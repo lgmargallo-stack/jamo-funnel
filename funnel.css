@@ -40,6 +40,9 @@
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
+/* Reserve the gutter so a momentary overflow on a step change cannot
+   flash a scrollbar and shove the whole column left by ~15px. */
+html{scrollbar-gutter:stable}
 body{
   background:var(--paper); color:var(--ink);
   font-family:var(--body); font-size:16px; line-height:1.5;
@@ -826,7 +829,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .is-editing .app{min-height:calc(100dvh - 70px)}
 @media (prefers-reduced-motion:reduce){ .editbar__dot{animation:none} }
 
-/* fade between quiz steps — one transition, nothing more */
+/* fade between quiz steps — opacity only. A translateY on a 100dvh .app
+   briefly extends past the viewport, flashes a scrollbar, and jerks the
+   page sideways for one frame; do not put it back. */
 .fade{animation:fade .18s ease both}
-@keyframes fade{from{opacity:0; transform:translateY(4px)} to{opacity:1; transform:none}}
+@keyframes fade{from{opacity:0} to{opacity:1}}
 @media (prefers-reduced-motion:reduce){ .fade{animation:none} }
