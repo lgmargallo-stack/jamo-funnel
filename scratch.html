@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609071118">
+<link rel="stylesheet" href="funnel.css?v=202609071145">
 </head>
 <body>
 
@@ -71,9 +71,9 @@
   </div>
 </div>
 
-<script src="funnel.config.js?v=202609071118"></script>
-<script src="copy.js?v=202609071118"></script>
-<script src="funnel.js?v=202609071118"></script>
+<script src="funnel.config.js?v=202609071145"></script>
+<script src="copy.js?v=202609071145"></script>
+<script src="funnel.js?v=202609071145"></script>
 <script>
 Funnel.hydrate();
 Funnel.copy.init();
@@ -212,8 +212,10 @@ Funnel.copy.init();
     var T = Funnel.copy.text;
     btn.textContent = T('scratch.cta_done', 'See my plan');
     hint.textContent = T('scratch.hint_done', 'Applied automatically at checkout');
-    /* the headline was an instruction; once it's done it should be the result */
-    title.textContent = T('scratch.h1_done', '{discount}% off, locked in');
+    /* the headline was an instruction; once it's done it should be the result.
+       copy.text returns the raw string — fill merge tokens for visitors. */
+    var doneH1 = T('scratch.h1_done', '{discount}% off, locked in');
+    title.textContent = Funnel.copy.editing ? doneH1 : Funnel.fill(doneH1);
     if (navigator.vibrate) { try { navigator.vibrate(28); } catch (e) {} }
     Funnel.answers.set('discount', Funnel.cfg('flow.discountPct', 64));
   }

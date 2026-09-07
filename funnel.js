@@ -1049,6 +1049,7 @@
     route: route,
     hydrate: hydrate,
     merges: mergeValues,
+    fill: fillTemplate,
     quiz: quiz,
     config: CFG,
     cfg: cfg,
