@@ -189,19 +189,23 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .opt__box svg{display:none}
 .opt.is-on .opt__box svg{display:block}
 
+/* One placement rule for every screen: on a phone the action is a full-width
+   bar pinned to the bottom; on desktop it is a fixed-width button centred under
+   the content. Never offset per screen type — that is what looked arbitrary. */
 .step__foot{
   margin-top:auto; padding:22px var(--gutter) 34px;
-  display:flex; flex-direction:column; gap:10px;
-  /* on a phone the multi-select can run past the fold — keep Continue reachable */
+  display:flex; flex-direction:column; gap:10px; align-items:stretch;
   position:sticky; bottom:0; background:var(--paper);
+  border-top:1px solid var(--line-2);
 }
+.dark .step__foot{background:var(--ink); border-top-color:#22262D}
 @media (min-width:900px){
   .step__foot{
-    position:static; max-width:1440px; width:100%; margin:22px auto 0;
-    align-items:flex-start; padding-bottom:40px;
+    position:static; border-top:0; align-items:center;
+    padding:36px var(--gutter) 52px; gap:12px;
   }
-  .step__foot .btn{width:600px; margin-left:536px}
-  .step__foot .foot-note{margin-left:536px}
+  .step__foot .btn{width:420px}
+  .step__foot .foot-note{text-align:center}
 }
 .foot-note{
   font-family:var(--mono); font-size:9px; letter-spacing:.06em;
@@ -229,6 +233,12 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 /* ------------------------------------------------------------- panels -- */
 .panel{padding:0 var(--gutter)}
+@media (min-width:900px){
+  /* interstitials and the loader share the page measure — nothing runs
+     edge to edge on a wide screen */
+  .panel{max-width:var(--maxw); margin:0 auto; width:100%}
+  .panel--narrow{max-width:720px}
+}
 .panel--centred{
   display:flex; flex-direction:column; gap:12px;
   max-width:560px; margin:0 auto; width:100%;
@@ -359,7 +369,40 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   display:flex; align-items:center; justify-content:center; overflow:hidden;
   touch-action:none;
 }
-.scratch__prize{display:flex; flex-direction:column; align-items:center; gap:2px}
+.scratch__prize{
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  transform:scale(.94); transition:transform .45s cubic-bezier(.2,1.3,.4,1);
+}
+.scratch.is-revealed .scratch__prize{transform:scale(1)}
+.scratch__ring{
+  position:absolute; inset:0; border:2px solid var(--warm); opacity:0;
+  pointer-events:none;
+}
+.scratch.is-revealed .scratch__ring{animation:ring .55s ease-out both}
+@keyframes ring{
+  0%{opacity:.9; transform:scale(.97)}
+  100%{opacity:0; transform:scale(1.02)}
+}
+.scratch__meter{
+  position:absolute; left:0; right:0; bottom:0; height:3px; background:transparent;
+}
+.scratch__meter span{
+  display:block; height:100%; width:0; background:var(--warm);
+  transition:width .12s linear;
+}
+.scratch.is-revealed .scratch__meter{opacity:0; transition:opacity .3s ease}
+.scratch__done{
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  margin-top:14px; opacity:0; transform:translateY(4px);
+  transition:opacity .35s ease .15s, transform .35s ease .15s;
+  font-size:14px; font-weight:600;
+}
+.scratch__done.is-on{opacity:1; transform:none}
+.scratch__done svg{flex:0 0 18px}
+@media (prefers-reduced-motion:reduce){
+  .scratch__prize, .scratch__done{transition:none}
+  .scratch.is-revealed .scratch__ring{animation:none}
+}
 .scratch__pct{
   font-family:var(--disp); font-weight:800; color:var(--warm);
   font-size:clamp(64px,18vw,108px); line-height:.9; letter-spacing:-.045em;
@@ -443,7 +486,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   display:flex; flex-direction:column; gap:10px; z-index:20;
 }
 @media (min-width:900px){
-  .stickycta{position:static; border:0; padding:0 0 8px; gap:12px}
+  /* same placement as .step__foot: centred, fixed width, every page */
+  .stickycta{position:static; border:0; padding:0 0 8px; gap:12px; align-items:center}
+  .stickycta .btn{width:420px}
+  .section > .btn{width:420px; align-self:center}
   /* --dup marks a bar that duplicates a CTA already visible on desktop
      (the plan page's side rail). Only that one is hidden. */
   .stickycta--dup{display:none}

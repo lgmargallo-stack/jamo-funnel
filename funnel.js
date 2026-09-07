@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Jamo Dating Protocols funnel — shared runtime.
+   [BRAND] funnel — shared runtime.
 
    Loaded by every page. Exposes:
      Funnel.answers      read/write the quiz answer store (localStorage)
@@ -242,7 +242,7 @@
         '<div class="topbar__side">' +
           (o.back === false ? '' : '<button class="iconbtn" type="button" data-act="back" aria-label="Go back">' + ICON.back + '</button>') +
         '</div>' +
-        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || 'Jamo Dating Protocols') + '</span>' +
+        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || '[BRAND]') + '</span>' +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -318,13 +318,13 @@
     function renderAuthority() {
       return '<div class="app fade">' +
         topbar({}) +
-        '<div class="panel" style="padding-top:26px">' +
+        '<div class="panel panel--narrow" style="padding-top:26px">' +
           '<p class="h1" style="color:var(--cold);margin-bottom:6px">[REAL NUMBER]</p>' +
           '<p class="h2" style="margin-bottom:26px">men have run this plan</p>' +
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
             '<p class="h2" style="font-weight:600">You don\'t need to beg or chase. You need to change what she feels when your name comes up.</p>' +
-            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The Jamo Dating Protocols team</p>' +
+            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The [BRAND] team</p>' +
           '</div>' +
           '<p class="q-sub" style="margin-top:22px">Built on published research into attachment and re-connection — ' +
             '<a href="#">[SOURCE 1]</a>, <a href="#">[SOURCE 2]</a>. Cite what you actually used.</p>' +
@@ -339,7 +339,7 @@
         topbar({}) +
         '<div class="split">' +
           '<div class="split__col">' +
-            '<div class="panel" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
+            '<div class="panel panel--narrow" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
               '<span class="eyebrow eyebrow--cold">Worth knowing</span>' +
               '<h1 class="h1">' + esc(d.title) + '</h1>' +
               '<p class="lede">' + esc(fillTemplate(d.body)) + '</p>' +
@@ -449,8 +449,13 @@
     /* --- loader: three phases, one micro-commitment modal at phase 2 --- */
 
     function runLoader() {
+      /* Four seconds, end to end. Long enough to read as work, short enough
+         that nobody bails. The modal pauses the clock, so the visible progress
+         is always ~4s of motion regardless of how long they take to answer. */
       var fast = new URLSearchParams(location.search).get('fast') === '1';
-      var phaseMs = fast ? 2500 : 22000;   // ~66s total, matching the design
+      var total = fast ? 1200 : 4000;
+      var phaseMs = total / LOADER_PHASES.length;
+      var tick = 40;                        // smooth bar, not a 250ms stutter
       var phase = 0, pct = 0, paused = false, asked = false;
       var els = mount.querySelectorAll('.phase');
 
@@ -459,7 +464,7 @@
           var segs = el.querySelectorAll('.rail__seg');
           var p = idx < phase ? 100 : idx === phase ? pct : 0;
           el.className = 'phase ' + (idx < phase ? 'is-done' : idx === phase ? 'is-live' : 'is-idle');
-          el.querySelector('.phase__pct').textContent = idx === phase ? p + '%' : '—';
+          el.querySelector('.phase__pct').textContent = idx === phase ? Math.round(p) + '%' : '—';
           segs.forEach(function (seg, k) {
             seg.classList.toggle('is-on', (k + 1) / segs.length * 100 <= p);
           });
@@ -469,7 +474,7 @@
 
       loaderTimer = setInterval(function () {
         if (paused) return;
-        pct += Math.ceil(100 / (phaseMs / 250));
+        pct += 100 / (phaseMs / tick);
         if (phase === 1 && pct >= 50 && !asked) {
           asked = true; paused = true;
           ask('Are you someone who finishes what you start?', function () { paused = false; });
@@ -477,7 +482,7 @@
         if (pct >= 100) { pct = 0; phase++; }
         if (phase >= LOADER_PHASES.length) { clearInterval(loaderTimer); loaderTimer = null; next(); return; }
         paint();
-      }, 250);
+      }, tick);
     }
 
     function ask(question, done) {
