@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Your discount</title>
+<title>[BRAND] — Your discount</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,42 +14,39 @@
 
 <div class="app">
   <header class="topbar"><div class="topbar__side"></div>
-    <span class="wordmark">Jamo Dating Protocols</span>
+    <span class="wordmark">[BRAND]</span>
     <div class="topbar__side topbar__side--end"></div>
   </header>
 
-  <div class="page" style="padding-top:20px">
-    <div class="planlayout" style="align-items:center">
-      <div class="planlayout__main" style="gap:20px">
-        <span class="eyebrow eyebrow--cold">One thing first</span>
-        <h1 class="h1" id="scratchTitle">Scratch to reveal your discount, <span data-merge="first_name">there</span></h1>
-        <p class="lede">It applies automatically at checkout and holds for this session.</p>
-        <!-- NOTE FOR THE BUILD, not for the visitor: everyone reveals the same
-             number, so call it "your discount" — never stage a random draw that
-             always lands on 64%. Keep the percentage true against the list price. -->
-      </div>
+  <!-- One centred column: copy, card and action share the same axis, so the
+       eye runs straight down the middle instead of hopping left to right. -->
+  <div class="page scratchpage">
+    <span class="eyebrow eyebrow--cold">One thing first</span>
+    <h1 class="h1" id="scratchTitle">Scratch to reveal your discount, <span data-merge="first_name">there</span></h1>
+    <p class="lede">It applies automatically at checkout and holds for this session.</p>
+    <!-- NOTE FOR THE BUILD, not for the visitor: everyone reveals the same
+         number, so call it "your discount" — never stage a random draw that
+         always lands on 64%. Keep the percentage true against the list price. -->
 
-      <div class="planlayout__side" style="position:static">
-        <div class="scratch" id="scratch">
-          <div class="scratch__prize">
-            <span class="scratch__pct">64%</span>
-            <span class="scratch__sub">off your first plan</span>
-          </div>
-          <span class="scratch__ring" aria-hidden="true"></span>
-          <div class="scratch__meter" aria-hidden="true"><span id="scratchMeter"></span></div>
-          <canvas id="scratchCanvas" aria-label="Scratch panel"></canvas>
-        </div>
-        <p class="scratch__done" id="scratchDone">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5A1F" stroke-width="2.6" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
-          <span>Discount locked to this session</span>
-        </p>
-        <p class="foot-note" style="text-align:center;margin-top:14px" id="scratchHint">Drag across the panel to uncover it</p>
+    <div class="scratch" id="scratch">
+      <div class="scratch__prize">
+        <span class="scratch__pct">64%</span>
+        <span class="scratch__sub">off your first plan</span>
       </div>
+      <span class="scratch__ring" aria-hidden="true"></span>
+      <div class="scratch__meter" aria-hidden="true"><span id="scratchMeter"></span></div>
+      <canvas id="scratchCanvas" aria-label="Scratch panel"></canvas>
     </div>
-  </div>
 
-  <div class="stickycta" style="margin-top:auto">
-    <button class="btn" id="continue" type="button">Scratch to continue</button>
+    <p class="scratch__done" id="scratchDone">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5A1F" stroke-width="2.6" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
+      <span>Discount locked to this session</span>
+    </p>
+    <p class="foot-note" id="scratchHint">Drag across the panel to uncover it</p>
+
+    <div class="step__foot">
+      <button class="btn" id="continue" type="button">Scratch to continue</button>
+    </div>
   </div>
 
   <footer class="sitefoot">

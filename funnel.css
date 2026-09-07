@@ -379,6 +379,18 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .modal__actions .btn{min-height:52px; font-size:13px}
 
 /* ------------------------------------------------------------ scratch -- */
+/* the scratch page is a single centred column — copy, card and action on
+   one axis */
+/* compound selector: .page sets a wider measure later in this file */
+.page.scratchpage{
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+  gap:14px; max-width:560px; padding-top:24px;
+}
+.scratchpage .lede{max-width:44ch}
+.scratchpage .step__foot{align-items:center; max-width:420px}
+.scratchpage .scratch{margin-top:10px}
+@media (min-width:900px){ .scratchpage{padding-top:56px; gap:16px} }
+
 .scratch{
   position:relative; width:100%; max-width:480px; margin:0 auto;
   aspect-ratio:6/5; border:1px solid var(--line); background:var(--shade);
@@ -409,7 +421,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .scratch.is-revealed .scratch__meter{opacity:0; transition:opacity .3s ease}
 .scratch__done{
   display:flex; align-items:center; justify-content:center; gap:9px;
-  margin-top:14px; opacity:0; transform:translateY(4px);
+  margin:0; opacity:0; transform:translateY(4px);
   transition:opacity .35s ease .15s, transform .35s ease .15s;
   font-size:14px; font-weight:600;
 }
