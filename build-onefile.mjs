@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const css = readFileSync('funnel.css','utf8');
 const core = readFileSync('funnel.js','utf8');
+const conf = readFileSync('funnel.config.js','utf8'); // must run before funnel.js
 const copy = readFileSync('copy.js','utf8');   // must run before funnel.js
 
 function parse(file){
@@ -70,6 +71,9 @@ ${offer.markup}
   <button type="button" data-jump="offer">Offer</button>
 </nav>
 
+<script>
+${conf}
+</script>
 <script>
 ${copy}
 </script>

@@ -14,6 +14,51 @@
 (function (global) {
   'use strict';
 
+  /* -------------------------------------------------------------- config
+     funnel.config.js is the only file that changes between offers. Every
+     default below is a fallback for when it is missing, so the engine still
+     runs (and still says something sensible) if the config fails to load. */
+  var CFG = global.FUNNEL_CONFIG || {};
+  function cfg(path, fallback) {
+    var node = CFG, parts = path.split('.');
+    for (var i = 0; i < parts.length; i++) {
+      if (node == null || node[parts[i]] === undefined) return fallback;
+      node = node[parts[i]];
+    }
+    return node;
+  }
+
+  /* Theme and fonts come from the config as CSS custom properties, so a new
+     offer restyles without touching funnel.css. Runs before first paint. */
+  function applyTheme() {
+    var t = cfg('theme', {}), r = document.documentElement;
+    var MAP = {
+      cold: '--cold', coldTint: '--cold-tint', coldLine: '--cold-line',
+      warm: '--warm', warmTint: '--warm-tint', warmLine: '--warm-line',
+      ink: '--ink', ink2: '--ink-2', slate: '--slate', mute: '--mute',
+      faint: '--faint', line: '--line', line2: '--line-2',
+      shade: '--shade', paper: '--paper'
+    };
+    Object.keys(MAP).forEach(function (k) { if (t[k]) r.style.setProperty(MAP[k], t[k]); });
+    var b = cfg('brand', {});
+    if (b.display) r.style.setProperty('--disp', b.display);
+    if (b.body) r.style.setProperty('--body', b.body);
+    if (b.mono) r.style.setProperty('--mono', b.mono);
+    if (b.fonts && !document.querySelector('link[data-funnel-fonts]')) {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet'; l.href = b.fonts; l.setAttribute('data-funnel-fonts', '');
+      document.head.appendChild(l);
+    }
+  }
+  applyTheme();
+
+  /* Registered before any page renders, so markup placeholders like [BRAND]
+     and [COMPANY] resolve to this offer's names without being edited. */
+  function seedBrandCopy() {
+    t('brand.wordmark', cfg('brand.name', '[BRAND]'));
+    t('foot.company', cfg('brand.company', '[COMPANY]') + ' · ' + cfg('brand.address', '[ADDRESS]'));
+  }
+
   /* ---------------------------------------------------------------- data */
 
   // Ad/tracking params that must survive every hop in the funnel.
@@ -36,10 +81,31 @@
      visitors see unless copy.js has a value for the id. */
   var COPY = global.COPY || {};
   var DEFAULTS = {};                 // id -> the string as authored
-  var EDIT = new URLSearchParams(location.search).get('edit') === '1';
+  /* Edit mode is gated by flow.edit in funnel.config.js:
+       true          ?edit=1 works — use while you are building
+       false         edit mode is off entirely — the launch setting
+       'some-word'   ?edit=some-word works, ?edit=1 does not
+
+     The key is a guard against a stray ?edit=1 in a shared link, NOT a
+     security control: funnel.config.js is served to the browser, so anyone
+     who looks can read it. That is acceptable because edit mode only ever
+     changes what that one browser sees — it cannot touch your live copy. */
+  var EDIT = (function () {
+    var want = new URLSearchParams(location.search).get('edit');
+    if (want == null) return false;
+    var allow = cfg('flow.edit', true);
+    if (allow === false || allow == null) return false;
+    if (allow === true) return want === '1';
+    return want === String(allow);
+  })();
+
+  /* Drafts apply ONLY in edit mode. Without this, copy you typed on the live
+     URL and never discarded keeps overriding copy.js in your own browser —
+     so you check the live site, see your unpushed words, and conclude the
+     deploy worked when it did not. */
   var DRAFT_KEY = 'bq.copydraft.v1';
   var draft = {};
-  try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; } catch (e) {}
+  if (EDIT) { try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; } catch (e) {} }
 
   function t(id, fallback) {
     DEFAULTS[id] = fallback;
@@ -63,7 +129,7 @@
 
   // One question = one object. Add, remove or reorder freely: the progress
   // rail, the step count and the desktop index all read from this array.
-  var QUESTIONS = [
+  var QUESTIONS = cfg('questions', [
     { id: 'age', section: 1, kind: 'age',
       title: 'The smartest way to get her back',
       sub: 'Select your age to begin',
@@ -133,12 +199,12 @@
       sub: 'Choose all that apply',
       note: 'These become the outcomes listed on your results page.',
       options: ["She's texting first", "We're talking again", "I've stopped overthinking", 'Back together', 'Sleeping properly', 'Fit and sharp again'] }
-  ];
+  ]);
 
-  var SECTION_NAMES = { 1: 'Your situation', 2: 'Her signals & your patterns', 3: 'Readiness' };
+  var SECTION_NAMES = cfg('sections', { 1: 'Your situation', 2: 'Her signals & your patterns', 3: 'Readiness' });
 
   // Interstitials sit between questions, keyed by the question they follow.
-  var INTERSTITIALS = {
+  var INTERSTITIALS = cfg('interstitials', {
     age: { id: 'authority', kind: 'authority' },
     goal: { id: 'relief', kind: 'relief',
       title: "That's fixable — and faster than you think",
@@ -146,28 +212,28 @@
     slipped: { id: 'insight', kind: 'insight',
       title: 'Every one of those is trainable',
       body: "Trust and emotional distance aren't personality flaws — they're patterns, and patterns respond to a sequence. Your plan starts with the two you picked." }
-  };
+  });
 
-  var LOADER_PHASES = ['Mapping your situation', 'Scoring her signals', 'Selecting your modules'];
+  var LOADER_PHASES = cfg('loader.phases', ['Mapping your situation', 'Scoring her signals', 'Selecting your modules']);
 
   /* Sample social proof for the loader screen.
      These are SAMPLE copy so the funnel is presentable in review — every card
      says so on its face, and the names are initials, not invented people with
      verified badges. Replace all three with real reviews before you spend a
      dollar on traffic; do not remove the SAMPLE meta until you do. */
-  var REVIEWS = [
+  var REVIEWS = cfg('reviews', [
     { initials: 'M T', name: 'Marcus T.', meta: 'Sample review',
       body: 'Week one was mostly about me, not about her. That turned out to be the part I had been getting wrong.' },
     { initials: 'D R', name: 'Daniel R.', meta: 'Sample review',
       body: 'The order was what made the difference. I had been doing roughly the right things at completely the wrong time.' },
     { initials: 'J O', name: 'James O.', meta: 'Sample review',
       body: 'First time in two months I got through a whole day without checking her profile. That alone was worth it.' }
-  ];
+  ]);
 
   // The micro-commitment asked mid-loader. Edit mode never runs the loader, so
   // this and the modal's buttons are registered by hand below to keep them in
   // copy.js.
-  var COMMITMENT_Q = 'Are you someone who finishes what you start?';
+  var COMMITMENT_Q = cfg('loader.commitment', 'Are you someone who finishes what you start?');
 
   /* -------------------------------------------------------------- store */
 
@@ -197,7 +263,11 @@
     var qs = currentParams().toString();
     return qs ? href + (href.indexOf('?') > -1 ? '&' : '?') + qs : href;
   }
-  function go(href) { location.href = link(href); }
+  /* Stage names resolve through config.routes so the funnel works on a page
+     builder where 'scratch.html' is really /your-discount. Anything that is
+     already a path or URL passes through untouched. */
+  function route(name) { return cfg('routes.' + name, null) || name; }
+  function go(href) { location.href = link(route(href)); }
 
   /* ------------------------------------------------------------- merges */
 
@@ -214,21 +284,31 @@
     var a = read();
     var issues = a.issues || [];
     var outcomes = a.outcomes || [];
+    /* Fallbacks are per-offer vocabulary, so they live in the config. They
+       only ever show if someone lands on a later page without taking the
+       quiz — but "Your  plan," reads as broken, so they have to say
+       something in this offer's language. */
+    var d = cfg('merges', {});
+    var goal = a.goal || d.goal || 'your plan';
     return {
-      first_name: a.first_name || 'there',
-      her_name: a.her_name || 'her',
-      status: a.status || 'Recently broke up',
-      goal: (a.goal || 'Get her back'),
-      goal_lower: (a.goal || 'Get her back').toLowerCase(),
-      time_since: a.time_since || 'recently',
-      hardest_part: a.hardest_part || "I never know what to say",
-      issue_1: issues[0] || 'Emotional distance',
-      issue_2: issues[1] || 'Different priorities',
-      issue_1_lower: (issues[0] || 'emotional distance').toLowerCase(),
-      issue_2_lower: (issues[1] || 'different priorities').toLowerCase(),
-      outcome_1: outcomes[0] || "She's texting first",
-      outcome_2: outcomes[1] || "I've stopped overthinking",
-      promo_code: promoCode(a.first_name)
+      first_name: a.first_name || d.first_name || 'there',
+      her_name: a.her_name || d.her_name || 'her',
+      status: a.status || d.status || '',
+      goal: goal,
+      goal_lower: String(goal).toLowerCase(),
+      time_since: a.time_since || d.time_since || 'recently',
+      hardest_part: a.hardest_part || d.hardest_part || '',
+      issue_1: issues[0] || d.issue_1 || '',
+      issue_2: issues[1] || d.issue_2 || '',
+      issue_1_lower: String(issues[0] || d.issue_1 || '').toLowerCase(),
+      issue_2_lower: String(issues[1] || d.issue_2 || '').toLowerCase(),
+      outcome_1: outcomes[0] || d.outcome_1 || '',
+      outcome_2: outcomes[1] || d.outcome_2 || '',
+      promo_code: promoCode(a.first_name),
+      discount: String(cfg('flow.discountPct', 64)),
+      brand: cfg('brand.name', '[BRAND]'),
+      company: cfg('brand.company', '[COMPANY]'),
+      address: cfg('brand.address', '[ADDRESS]')
     };
   }
   function hydrate(root) {
@@ -295,8 +375,8 @@
       if (INTERSTITIALS[q.id]) steps.push({ kind: 'interstitial', data: INTERSTITIALS[q.id] });
     });
     steps.push({ kind: 'loader' });
-    steps.push({ kind: 'email' });
-    steps.push({ kind: 'names' });
+    if (cfg('flow.emailStep', true) !== false) steps.push({ kind: 'email' });
+    if (cfg('flow.namesStep', true) !== false) steps.push({ kind: 'names' });
 
     var qCount = QUESTIONS.length;                       // 11
     var groups = [0, 0, 0];
@@ -330,7 +410,7 @@
         '</div>' +
         (o.section
           ? '<span class="eyebrow topbar__section">' + esc(o.section) + '</span>'
-          : C('brand.wordmark', '[BRAND]', 'span', 'class="wordmark"')) +
+          : C('brand.wordmark', cfg('brand.name', '[BRAND]'), 'span', 'class="wordmark"')) +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -488,8 +568,11 @@
           C('loader.reviews_label', 'What men say after week one', 'p', 'class="eyebrow" style="margin-bottom:14px"') +
           '<div class="reviews">' + REVIEWS.map(function (r, idx) {
             var n = idx + 1;
+            /* The avatar is an image slot whose empty state is the monogram,
+               not a grey box — an unfilled review still looks finished. The
+               initials stay editable in copy.js under review<n>.initials. */
             return '<div class="card"><div class="review__head">' +
-              C('review' + n + '.initials', r.initials, 'span', 'class="review__av"') +
+              IMG('img.review' + n, 'review__av', t('review' + n + '.initials', r.initials)) +
               '<span class="review__id">' +
                 C('review' + n + '.name', r.name, 'span', 'class="review__name"') +
                 C('review' + n + '.meta', r.meta, 'span', 'class="review__meta"') +
@@ -583,7 +666,9 @@
     }
     function next() { if (i < steps.length - 1) goTo(i + 1); else finish(); }
 
-    function finish() { go('scratch.html'); }
+    /* The scratch page is optional; without it the quiz hands straight to
+       the plan. Nothing else in the flow needs to know. */
+    function finish() { go(cfg('flow.scratch', true) === false ? 'plan' : 'scratch'); }
 
     /* --- loader: three phases, one micro-commitment modal at phase 2 --- */
 
@@ -592,7 +677,7 @@
          that nobody bails. The modal pauses the clock, so the visible progress
          is always ~4s of motion regardless of how long they take to answer. */
       var fast = new URLSearchParams(location.search).get('fast') === '1';
-      var total = fast ? 1200 : 4000;
+      var total = fast ? 1200 : cfg('flow.loaderSeconds', 4) * 1000;
       var phaseMs = total / LOADER_PHASES.length;
       var tick = 40;                        // smooth bar, not a 250ms stutter
       var phase = 0, pct = 0, paused = false, asked = false;
@@ -751,7 +836,10 @@
     (root || document).querySelectorAll('[data-copy]').forEach(function (el) {
       var id = el.getAttribute('data-copy');
       var def = el.getAttribute('data-default');
-      if (def == null) def = el.textContent.trim();
+      /* A default already registered from funnel.config.js wins over the
+         placeholder sitting in the markup — that is how [BRAND] becomes the
+         real name on pages the engine does not render itself. */
+      if (def == null) def = DEFAULTS[id] != null ? DEFAULTS[id] : el.textContent.trim();
       if (DEFAULTS[id] == null) DEFAULTS[id] = def;
       var raw = draft[id] != null ? draft[id] : (COPY[id] != null ? COPY[id] : def);
       /* {first_name} and friends — and [label](href) links — stay visible while
@@ -951,14 +1039,19 @@
 
   /* ------------------------------------------------------------- export */
 
+  seedBrandCopy();
+
   global.Funnel = {
     QUESTIONS: QUESTIONS,
     answers: { read: read, write: write, set: set, clear: clear },
     link: link,
     go: go,
+    route: route,
     hydrate: hydrate,
     merges: mergeValues,
     quiz: quiz,
+    config: CFG,
+    cfg: cfg,
     copy: { init: initCopy, apply: applyCopy, file: copyFile, editing: EDIT, text: t }
   };
 })(window);

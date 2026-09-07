@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609070542">
+<link rel="stylesheet" href="funnel.css?v=202609071118">
 </head>
 <body>
 
@@ -30,7 +30,7 @@
 
     <div class="scratch" id="scratch">
       <div class="scratch__prize">
-        <span class="scratch__pct" data-copy="scratch.pct">64%</span>
+        <span class="scratch__pct" data-copy="scratch.pct" data-default="{discount}%">64%</span>
         <span class="scratch__sub" data-copy="scratch.pct_sub">off your first plan</span>
       </div>
       <span class="scratch__ring" aria-hidden="true"></span>
@@ -50,7 +50,7 @@
   </div>
 
   <footer class="sitefoot">
-    <span data-copy="foot.company">[COMPANY] · [ADDRESS]</span>
+    <span data-copy="foot.company" data-default="{company} · {address}">[COMPANY] · [ADDRESS]</span>
     <span data-copy="foot.links" data-default="[Terms](#) · [Privacy](#) · [Subscription Terms](#)">Terms · Privacy · Subscription Terms</span>
   </footer>
 </div>
@@ -71,8 +71,9 @@
   </div>
 </div>
 
-<script src="copy.js?v=202609070542"></script>
-<script src="funnel.js?v=202609070542"></script>
+<script src="funnel.config.js?v=202609071118"></script>
+<script src="copy.js?v=202609071118"></script>
+<script src="funnel.js?v=202609071118"></script>
 <script>
 Funnel.hydrate();
 Funnel.copy.init();
@@ -212,9 +213,9 @@ Funnel.copy.init();
     btn.textContent = T('scratch.cta_done', 'See my plan');
     hint.textContent = T('scratch.hint_done', 'Applied automatically at checkout');
     /* the headline was an instruction; once it's done it should be the result */
-    title.textContent = T('scratch.h1_done', '64% off, locked in');
+    title.textContent = T('scratch.h1_done', '{discount}% off, locked in');
     if (navigator.vibrate) { try { navigator.vibrate(28); } catch (e) {} }
-    Funnel.answers.set('discount', 64);
+    Funnel.answers.set('discount', Funnel.cfg('flow.discountPct', 64));
   }
 
   size();
@@ -245,7 +246,7 @@ Funnel.copy.init();
      stuck behind a drag they cannot perform. */
   btn.addEventListener('click', function () {
     if (!revealed) { reveal(); return; }
-    Funnel.go('plan.html');
+    Funnel.go('plan');
   });
   setTimeout(function () {
     if (!revealed) hint.textContent = 'Drag across the panel — or press the button to reveal it';

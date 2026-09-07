@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609070542">
+<link rel="stylesheet" href="funnel.css?v=202609071118">
 </head>
 <body>
 
@@ -33,72 +33,13 @@
       <h1 class="h1" data-copy="offer.h1" data-default="Your {goal_lower} plan, {first_name}"></h1>
       <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--warm-tint);border:1px solid var(--warm-line)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
-        <span style="font-size:13.5px;font-weight:600" data-copy="offer.promo" data-default="Promo {promo_code} applied — 64% off your first term"></span>
+        <span style="font-size:13.5px;font-weight:600" data-copy="offer.promo" data-default="Promo {promo_code} applied — {discount}% off your first term"></span>
       </div>
     </div>
 
-    <div class="tiers" id="tiers">
+    <div class="tiers" id="tiers"></div>
 
-      <button class="tier" type="button" data-tier="4w" aria-pressed="false">
-        <span class="tier__row">
-          <span class="tier__head">
-            <span class="tier__mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg></span>
-            <span style="display:flex;flex-direction:column;gap:3px">
-            <span class="tier__name">4-week plan</span>
-            <span class="tier__perday">$0.86 per day</span>
-            </span>
-          </span>
-          <span class="tier__prices"><span class="tier__was">$54.99</span><span class="tier__now">$23.99</span></span>
-        </span>
-        <span class="tier__blurb" data-copy="offer.tier1_blurb">Enough to run the first reset and the opening message.</span>
-      </button>
-
-      <div class="tier tier--pick">
-        <span class="tier__flag">
-          <span class="eyebrow" data-copy="offer.badge">Most men choose this</span>
-          <span class="tier__save">SAVE 53%</span>
-        </span>
-        <button class="tier__inner" type="button" data-tier="12w" aria-pressed="true" style="width:100%;text-align:left">
-          <span class="tier__row">
-            <span class="tier__head">
-              <span class="tier__mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg></span>
-              <span style="display:flex;flex-direction:column;gap:3px">
-                <span class="tier__name">12-week plan</span>
-                <span class="tier__perday">$0.47 per day</span>
-              </span>
-            </span>
-            <span class="tier__prices"><span class="tier__was">$84.99</span><span class="tier__now">$39.99</span></span>
-          </span>
-          <span class="tier__blurb" data-copy="offer.tier2_blurb">The full sequence, with enough runway for the conversation to actually restart.</span>
-        </button>
-      </div>
-
-      <button class="tier" type="button" data-tier="24w" aria-pressed="false">
-        <span class="tier__row">
-          <span class="tier__head">
-            <span class="tier__mark"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg></span>
-            <span style="display:flex;flex-direction:column;gap:3px">
-              <span class="tier__name">24-week plan</span>
-              <span class="tier__perday">$0.44 per day</span>
-            </span>
-          </span>
-          <span class="tier__prices"><span class="tier__was">$114.99</span><span class="tier__now">$74.99</span></span>
-        </span>
-        <span class="tier__blurb" data-copy="offer.tier3_blurb">For long relationships, where rebuilding takes more than one season.</span>
-      </button>
-
-    </div>
-
-    <label class="bump" style="margin-top:16px">
-      <input type="checkbox" id="bump" style="position:absolute;opacity:0;width:0;height:0">
-      <span class="checkrow__box" style="margin-top:2px">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
-      </span>
-      <span>
-        <span class="bump__t" data-copy="offer.bump_t">Add: 30 Texts That Reopen the Conversation</span><br>
-        <span class="bump__d"><span data-copy="offer.bump_d1">The exact messages, scripted per situation.</span> <span class="bump__price">+$24</span> <span data-copy="offer.bump_d2">one time, added to this order.</span></span>
-      </span>
-    </label>
+    <div id="bumpMount"></div>
 
     <div class="section" style="gap:16px">
       <button class="btn" type="button" data-checkout data-copy="offer.cta">Get my plan</button>
@@ -149,32 +90,95 @@
   </div>
 
   <footer class="sitefoot">
-    <span data-copy="foot.company">[COMPANY] · [ADDRESS]</span>
+    <span data-copy="foot.company" data-default="{company} · {address}">[COMPANY] · [ADDRESS]</span>
     <span data-copy="foot.links" data-default="[Terms](#) · [Privacy](#) · [Subscription Terms](#)">Terms · Privacy · Subscription Terms</span>
   </footer>
 
 </div>
 
-<script src="copy.js?v=202609070542"></script>
-<script src="funnel.js?v=202609070542"></script>
+<script src="funnel.config.js?v=202609071118"></script>
+<script src="copy.js?v=202609071118"></script>
+<script src="funnel.js?v=202609071118"></script>
 <script>
 Funnel.hydrate();
-Funnel.copy.init();
 
 (function () {
-  /* Replace with your real Checkout Champ campaign / product ids. */
-  var TIERS = {
-    '4w':  { intro: 23.99, rebill: '$54.99 every 30 days',  label: '$23.99 today, then $54.99 every 30 days',  cc: '[CC_PRODUCT_4W]' },
-    '12w': { intro: 39.99, rebill: '$89.99 every 90 days',  label: '$39.99 today, then $89.99 every 90 days',  cc: '[CC_PRODUCT_12W]' },
-    '24w': { intro: 74.99, rebill: '$149.00 every 180 days', label: '$74.99 today, then $149.00 every 180 days', cc: '[CC_PRODUCT_24W]' }
-  };
-  var chosen = '12w';
-  var terms = document.getElementById('terms');
+  var cfg = Funnel.cfg;
+  var TIERS = cfg('tiers.items', []);
+  var chosen = cfg('tiers.pick', TIERS.length ? TIERS[0].key : '');
+  var byKey = {};
+  TIERS.forEach(function (t) { byKey[t.key] = t; });
 
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function label(t) { return t.now + ' today, then ' + t.rebill; }
+
+  /* A tier is one button. The picked tier wears the badge and the flag row;
+     everything else is identical, so adding a fourth tier is a config edit. */
+  var TICK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>';
+
+  function tierHTML(t, i) {
+    var n = i + 1;
+    var inner =
+      '<span class="tier__row">' +
+        '<span class="tier__head">' +
+          '<span class="tier__mark">' + TICK + '</span>' +
+          '<span style="display:flex;flex-direction:column;gap:3px">' +
+            '<span class="tier__name">' + esc(t.name) + '</span>' +
+            '<span class="tier__perday">' + esc(t.perDay) + '</span>' +
+          '</span>' +
+        '</span>' +
+        '<span class="tier__prices"><span class="tier__was">' + esc(t.was) + '</span>' +
+          '<span class="tier__now">' + esc(t.now) + '</span></span>' +
+      '</span>' +
+      '<span class="tier__blurb" data-copy="offer.tier' + n + '_blurb" data-default="' + esc(t.blurb) + '">' + esc(t.blurb) + '</span>';
+
+    if (!t.badge) {
+      return '<button class="tier" type="button" data-tier="' + esc(t.key) + '" aria-pressed="false">' + inner + '</button>';
+    }
+    return '<div class="tier tier--pick">' +
+availableFlag(t, n) +
+      '<button class="tier__inner" type="button" data-tier="' + esc(t.key) + '" aria-pressed="true" style="width:100%;text-align:left">' +
+        inner +
+      '</button></div>';
+  }
+  function availableFlag(t, n) {
+    return '<span class="tier__flag">' +
+      '<span class="eyebrow" data-copy="offer.badge" data-default="' + esc(t.badge) + '">' + esc(t.badge) + '</span>' +
+      (t.save ? '<span class="tier__save">' + esc(t.save) + '</span>' : '') +
+    '</span>';
+  }
+
+  document.getElementById('tiers').innerHTML = TIERS.map(tierHTML).join('');
+
+  /* Order bump — omitted entirely when the config has none. */
+  var bump = cfg('bump', null);
+  if (bump) {
+    document.getElementById('bumpMount').innerHTML =
+      '<label class="bump" style="margin-top:16px">' +
+        '<input type="checkbox" id="bump" style="position:absolute;opacity:0;width:0;height:0">' +
+        '<span class="checkrow__box" style="margin-top:2px">' + TICK + '</span>' +
+        '<span>' +
+          '<span class="bump__t" data-copy="offer.bump_t" data-default="' + esc(bump.title) + '">' + esc(bump.title) + '</span><br>' +
+          '<span class="bump__d">' +
+            '<span data-copy="offer.bump_d1" data-default="' + esc(bump.detail) + '">' + esc(bump.detail) + '</span> ' +
+            '<span class="bump__price">' + esc(bump.price) + '</span> ' +
+            '<span data-copy="offer.bump_d2" data-default="' + esc(bump.tail) + '">' + esc(bump.tail) + '</span>' +
+          '</span>' +
+        '</span>' +
+      '</label>';
+  }
+
+  Funnel.copy.init();
+
+  var terms = document.getElementById('terms');
   function select(key) {
     chosen = key;
     Funnel.answers.set('tier', key);
-    terms.textContent = TIERS[key].label;
+    terms.textContent = label(byKey[key]);
     document.querySelectorAll('[data-tier]').forEach(function (el) {
       var on = el.getAttribute('data-tier') === key;
       el.closest('.tier').classList.toggle('is-on', on);
@@ -182,43 +186,44 @@ Funnel.copy.init();
     });
   }
   document.querySelectorAll('[data-tier]').forEach(function (el) {
-    el.addEventListener('click', function () { select(el.getAttribute('data-tier')); });
+    el.addEventListener('click', function () {
+      if (Funnel.copy.editing) return;      // editing the blurb, not choosing
+      select(el.getAttribute('data-tier'));
+    });
   });
-  select(chosen);
+  if (byKey[chosen]) select(chosen);
 
-  document.getElementById('bump').addEventListener('change', function (e) {
+  var bumpBox = document.getElementById('bump');
+  if (bumpBox) bumpBox.addEventListener('change', function (e) {
     Funnel.answers.set('bump', e.target.checked);
   });
 
-  /* Checkout hand-off. Everything the order needs travels with it:
-     the tier, the bump, the ad params and the quiz answers you want on
-     the order record in Checkout Champ. */
+  /* Checkout hand-off. Everything the order needs travels with it: the tier,
+     the bump, the ad params and the answers you want on the order record. */
   document.querySelectorAll('[data-checkout]').forEach(function (b) {
     b.addEventListener('click', function () {
       var a = Funnel.answers.read();
       var qs = new URLSearchParams({
-        product: TIERS[chosen].cc,
-        bump: document.getElementById('bump').checked ? '1' : '0',
-        goal: a.goal || '',
-        status: a.status || '',
-        email: a.email || '',
-        first_name: a.first_name || ''
+        product: (byKey[chosen] || {}).cc || '',
+        bump: bumpBox && bumpBox.checked ? '1' : '0',
+        goal: a.goal || '', status: a.status || '',
+        email: a.email || '', first_name: a.first_name || ''
       });
-      // Point this at your Checkout Champ hosted checkout or embedded form.
-      location.href = Funnel.link('[CHECKOUT_URL]') + '&' + qs.toString();
+      location.href = Funnel.link(cfg('checkoutUrl', '#')) + '&' + qs.toString();
     });
   });
 
-  /* Session countdown. It does not reset on refresh — if it has run out,
-     say so rather than restarting a fake clock. */
+  /* Session countdown. It does not reset on refresh — if it has run out, say
+     so rather than restarting a fake clock. */
   var KEY = 'bq.deadline';
+  var mins = cfg('flow.timerMinutes', 10);
   var deadline = Number(sessionStorage.getItem(KEY) || 0);
-  if (!deadline) { deadline = Date.now() + 10 * 60 * 1000; sessionStorage.setItem(KEY, deadline); }
+  if (!deadline) { deadline = Date.now() + mins * 60 * 1000; sessionStorage.setItem(KEY, deadline); }
   var el = document.getElementById('timer');
   (function tick() {
     var left = Math.max(0, deadline - Date.now());
-    var m = Math.floor(left / 60000), s = Math.floor(left % 60000 / 1000);
-    el.textContent = left ? m + ':' + String(s).padStart(2, '0') : 'held';
+    var m = Math.floor(left / 60000), sec = Math.floor(left % 60000 / 1000);
+    el.textContent = left ? m + ':' + String(sec).padStart(2, '0') : 'held';
     if (left) requestAnimationFrame(function () { setTimeout(tick, 500); });
   })();
 })();

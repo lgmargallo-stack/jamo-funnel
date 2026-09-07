@@ -9,7 +9,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const PAGES = ['index.html', 'scratch.html', 'plan.html', 'offer.html'];
-const ASSETS = ['funnel.css', 'copy.js', 'funnel.js'];
+const ASSETS = ['funnel.css', 'funnel.config.js', 'copy.js', 'funnel.js'];
 const v = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 12);   // yyyymmddhhmm
 
 for (const page of PAGES) {

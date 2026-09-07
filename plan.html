@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609070542">
+<link rel="stylesheet" href="funnel.css?v=202609071118">
 </head>
 <body>
 
@@ -89,8 +89,8 @@
             <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px" data-copy="plan.rail_row2">Modules selected</span><span class="fact__v" id="moduleCount">6</span></div>
             <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px" data-copy="plan.rail_row3">First action</span><span class="fact__v" data-copy="plan.rail_row3v">Tonight</span></div>
           </div>
-          <button class="btn" type="button" data-go="offer.html" data-copy="plan.cta">Get my plan</button>
-          <p class="cta-note" data-copy="plan.cta_note" data-default="Your 64% discount is applied on the next screen.">Your 64% discount is applied on the next screen.</p>
+          <button class="btn" type="button" data-go="offer" data-copy="plan.cta">Get my plan</button>
+          <p class="cta-note" data-copy="plan.cta_note" data-default="Your {discount}% discount is applied on the next screen.">Your 64% discount is applied on the next screen.</p>
           <div style="height:1px;background:var(--line-2)"></div>
           <div style="display:flex;align-items:center;gap:14px">
             <span class="h2" style="color:var(--cold)">[N]</span>
@@ -103,19 +103,20 @@
   </div>
 
   <div class="stickycta stickycta--dup">
-    <button class="btn" type="button" data-go="offer.html" data-copy="plan.cta">Get my plan</button>
-    <p class="cta-note" data-copy="plan.cta_note" data-default="Your 64% discount is applied on the next screen.">Your 64% discount is applied on the next screen.</p>
+    <button class="btn" type="button" data-go="offer" data-copy="plan.cta">Get my plan</button>
+    <p class="cta-note" data-copy="plan.cta_note" data-default="Your {discount}% discount is applied on the next screen.">Your 64% discount is applied on the next screen.</p>
   </div>
 
   <footer class="sitefoot">
-    <span data-copy="foot.company">[COMPANY] · [ADDRESS]</span>
+    <span data-copy="foot.company" data-default="{company} · {address}">[COMPANY] · [ADDRESS]</span>
     <span data-copy="foot.links" data-default="[Terms](#) · [Privacy](#) · [Subscription Terms](#)">Terms · Privacy · Subscription Terms</span>
   </footer>
 
 </div>
 
-<script src="copy.js?v=202609070542"></script>
-<script src="funnel.js?v=202609070542"></script>
+<script src="funnel.config.js?v=202609071118"></script>
+<script src="copy.js?v=202609071118"></script>
+<script src="funnel.js?v=202609071118"></script>
 <script>
 Funnel.hydrate();
 Funnel.copy.init();
