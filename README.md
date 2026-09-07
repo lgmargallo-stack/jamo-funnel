@@ -47,6 +47,37 @@ Answers live in `localStorage` under `bq.answers.v1`. Any element with
 Nothing branches. Every path lands on the same lead page and the same offer —
 the merge fields are the only thing that differs between visitors.
 
+## Editing copy without touching code
+
+Add `?edit=1` to any page:
+
+```
+http://localhost:5500/index.html?edit=1
+http://localhost:5500/offer.html?edit=1
+```
+
+Every editable string gets a dashed outline. Click it and type. A bar at the
+bottom counts your changes; on the quiz it also has ‹ › arrows to walk all 17
+screens, because clicking an answer in edit mode types rather than advances.
+
+Changes are kept in your browser as you work, so you can reload freely. When
+you're done, click **Download copy.js** and replace the `copy.js` in the
+project with it. That file is what the site reads from then on — the strings in
+the markup become fallbacks.
+
+Merge tokens stay visible while editing (`Your {goal_lower} plan,
+{first_name}`) so you can move or remove them; visitors see them filled in.
+Available: `{first_name}` `{her_name}` `{goal}` `{goal_lower}` `{status}`
+`{time_since}` `{hardest_part}` `{issue_1}` `{issue_2}` `{outcome_1}`
+`{outcome_2}` `{promo_code}`.
+
+**Discard** clears your local edits and reloads. Nothing about edit mode is
+visible to visitors — no bar, no outlines, no editable text.
+
+A few lines aren't in edit mode on purpose: prices and rebill terms live in
+`TIERS` in `offer.html`, because a price that can be edited in two places is a
+price that will eventually disagree with the checkout.
+
 ## Before you ship
 
 - `[BRAND]`, `[COMPANY]`, `[ADDRESS]`, `[REAL NUMBER]`, `[N]`, `[SOURCE n]`,

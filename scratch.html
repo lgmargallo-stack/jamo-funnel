@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Your discount</title>
+<title>[BRAND] — Your discount</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,24 +14,24 @@
 
 <div class="app">
   <header class="topbar"><div class="topbar__side"></div>
-    <span class="wordmark">Jamo Dating Protocols</span>
+    <span class="wordmark">[BRAND]</span>
     <div class="topbar__side topbar__side--end"></div>
   </header>
 
   <!-- One centred column: copy, card and action share the same axis, so the
        eye runs straight down the middle instead of hopping left to right. -->
   <div class="page scratchpage">
-    <span class="eyebrow eyebrow--cold">One thing first</span>
-    <h1 class="h1" id="scratchTitle">Scratch to reveal your discount, <span data-merge="first_name">there</span></h1>
-    <p class="lede">It applies automatically at checkout and holds for this session.</p>
+    <span class="eyebrow eyebrow--cold" data-copy="scratch.eyebrow">One thing first</span>
+    <h1 class="h1" id="scratchTitle" data-copy="scratch.h1" data-default="Scratch to reveal your discount, {first_name}"></h1>
+    <p class="lede" data-copy="scratch.lede">It applies automatically at checkout and holds for this session.</p>
     <!-- NOTE FOR THE BUILD, not for the visitor: everyone reveals the same
          number, so call it "your discount" — never stage a random draw that
          always lands on 64%. Keep the percentage true against the list price. -->
 
     <div class="scratch" id="scratch">
       <div class="scratch__prize">
-        <span class="scratch__pct">64%</span>
-        <span class="scratch__sub">off your first plan</span>
+        <span class="scratch__pct" data-copy="scratch.pct">64%</span>
+        <span class="scratch__sub" data-copy="scratch.pct_sub">off your first plan</span>
       </div>
       <span class="scratch__ring" aria-hidden="true"></span>
       <div class="scratch__meter" aria-hidden="true"><span id="scratchMeter"></span></div>
@@ -40,12 +40,12 @@
 
     <p class="scratch__done" id="scratchDone">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF5A1F" stroke-width="2.6" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
-      <span>Discount locked to this session</span>
+      <span data-copy="scratch.done">Discount locked to this session</span>
     </p>
-    <p class="foot-note" id="scratchHint">Drag across the panel to uncover it</p>
+    <p class="foot-note" id="scratchHint" data-copy="scratch.hint">Drag across the panel to uncover it</p>
 
     <div class="step__foot">
-      <button class="btn" id="continue" type="button">Scratch to continue</button>
+      <button class="btn" id="continue" type="button" data-copy="scratch.cta">Scratch to continue</button>
     </div>
   </div>
 
@@ -61,8 +61,8 @@
      to your account. -->
 <div class="modal" id="applyModal">
   <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="applyTitle">
-    <span class="eyebrow">One moment</span>
-    <h2 class="modal__title" id="applyTitle">Reserving your discount</h2>
+    <span class="eyebrow" data-copy="scratch.modal_eyebrow">One moment</span>
+    <h2 class="modal__title" id="applyTitle" data-copy="scratch.modal_title">Reserving your discount</h2>
     <div class="progress" id="applyBar"><span></span></div>
     <div class="modal__steps">
       <span class="foot-note" id="applyStep" aria-live="polite">Checking eligibility</span>
@@ -71,9 +71,11 @@
   </div>
 </div>
 
+<script src="copy.js"></script>
 <script src="funnel.js"></script>
 <script>
 Funnel.hydrate();
+Funnel.copy.init();
 
 /* Scratch panel.
    Three things make this feel good instead of fiddly:
@@ -200,16 +202,19 @@ Funnel.hydrate();
     cv.style.pointerEvents = 'none';
     meter.style.width = '100%';
     done.classList.add('is-on');
-    btn.textContent = 'See my plan';
-    hint.textContent = 'Applied automatically at checkout';
+    var T = Funnel.copy.text;
+    btn.textContent = T('scratch.cta_done', 'See my plan');
+    hint.textContent = T('scratch.hint_done', 'Applied automatically at checkout');
     /* the headline was an instruction; once it's done it should be the result */
-    title.textContent = '64% off, locked in';
+    title.textContent = T('scratch.h1_done', '64% off, locked in');
     if (navigator.vibrate) { try { navigator.vibrate(28); } catch (e) {} }
     Funnel.answers.set('discount', 64);
   }
 
   size();
-  bootStall();
+  /* editing copy, not experiencing the funnel: skip the stall */
+  if (Funnel.copy.editing) document.getElementById('applyModal').hidden = true;
+  else bootStall();
   window.addEventListener('resize', function () { if (!revealed) size(); });
 
   cv.addEventListener('pointerdown', function (e) {

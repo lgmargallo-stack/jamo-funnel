@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Jamo Dating Protocols funnel — shared runtime.
+   [BRAND] funnel — shared runtime.
 
    Loaded by every page. Exposes:
      Funnel.answers      read/write the quiz answer store (localStorage)
@@ -28,6 +28,28 @@
      from the age gate. They still survive the hops to scratch / plan / offer,
      because those are the same tab. */
   var STORE = 'bq.answers.v1';
+
+  /* ---------------------------------------------------------------- copy
+     Every string on the site can be overridden by an id. Defaults live in the
+     markup and in QUESTIONS below; copy.js (window.COPY) overrides them; the
+     edit-mode draft in localStorage overrides that. Nothing here changes what
+     visitors see unless copy.js has a value for the id. */
+  var COPY = global.COPY || {};
+  var DEFAULTS = {};                 // id -> the string as authored
+  var EDIT = new URLSearchParams(location.search).get('edit') === '1';
+  var DRAFT_KEY = 'bq.copydraft.v1';
+  var draft = {};
+  try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY)) || {}; } catch (e) {}
+
+  function t(id, fallback) {
+    DEFAULTS[id] = fallback;
+    if (draft[id] != null) return draft[id];
+    if (COPY[id] != null) return COPY[id];
+    return fallback;
+  }
+  function saveDraft() {
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
+  }
   var store = window.sessionStorage;
 
   // One question = one object. Add, remove or reorder freely: the progress
@@ -252,7 +274,7 @@
         '<div class="topbar__side">' +
           (o.back === false ? '' : '<button class="iconbtn" type="button" data-act="back" aria-label="Go back">' + ICON.back + '</button>') +
         '</div>' +
-        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || 'Jamo Dating Protocols') + '</span>' +
+        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || '[BRAND]') + '</span>' +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -265,8 +287,8 @@
       return '<div class="app fade">' +
         topbar({ back: false }) +
         '<div class="panel" style="padding-bottom:26px">' +
-          '<h1 class="h1" style="margin-bottom:10px">' + esc(q.title) + '</h1>' +
-          '<p class="eyebrow">' + esc(q.sub) + '</p>' +
+          '<h1 class="h1" style="margin-bottom:10px" data-copy="q:age:title">' + esc(t('q:age:title', q.title)) + '</h1>' +
+          '<p class="eyebrow" data-copy="q:age:sub">' + esc(t('q:age:sub', q.sub)) + '</p>' +
         '</div>' +
         '<div class="panel">' +
           '<div class="agegrid">' + q.options.map(function (o) {
@@ -288,13 +310,17 @@
 
       var options = q.options.map(function (raw, idx) {
         var o = opt(raw);
+        var oid = 'q:' + q.id + ':opt:' + idx;
+        var olabel = t(oid, o.label);
+        var osub = o.sub ? t(oid + ':sub', o.sub) : null;
         var on = multi ? picked.indexOf(o.value) > -1 : picked === o.value;
         var marker = multi
           ? '<span class="opt__box">' + ICON.tick + '</span>'
           : '<span class="opt__key">' + LETTERS[idx] + '</span>';
-        var text = o.sub
-          ? '<span class="opt__text"><span class="opt__label">' + esc(o.label) + '</span><span class="opt__sub">' + esc(o.sub) + '</span></span>'
-          : '<span class="opt__label">' + esc(o.label) + '</span>';
+        var text = osub
+          ? '<span class="opt__text"><span class="opt__label" data-copy="' + oid + '">' + esc(olabel) + '</span>' +
+              '<span class="opt__sub" data-copy="' + oid + ':sub">' + esc(osub) + '</span></span>'
+          : '<span class="opt__label" data-copy="' + oid + '">' + esc(olabel) + '</span>';
         return '<button class="opt' + (on ? ' is-on' : '') + '" type="button" data-value="' + esc(o.value) + '"' +
           (multi ? ' aria-pressed="' + (on ? 'true' : 'false') + '"' : '') + '>' + marker + text + '</button>';
       }).join('');
@@ -306,10 +332,10 @@
           '<div class="step__body">' +
             '<div class="step__lede">' +
               '<span class="eyebrow eyebrow--cold">' + esc(SECTION_NAMES[q.section]) + '</span>' +
-              '<h1 class="q-title">' + esc(q.title) + '</h1>' +
-              (q.sub && !multi ? '<p class="q-sub">' + esc(q.sub) + '</p>' : '') +
-              (multi ? '<p class="eyebrow">' + esc(q.sub || 'Choose all that apply') + '</p>' : '') +
-              (q.note ? '<p class="q-sub">' + esc(q.note) + '</p>' : '') +
+              '<h1 class="q-title" data-copy="q:' + q.id + ':title">' + esc(t('q:' + q.id + ':title', q.title)) + '</h1>' +
+              (q.sub && !multi ? '<p class="q-sub" data-copy="q:' + q.id + ':sub">' + esc(t('q:' + q.id + ':sub', q.sub)) + '</p>' : '') +
+              (multi ? '<p class="eyebrow" data-copy="q:' + q.id + ':sub">' + esc(t('q:' + q.id + ':sub', q.sub || 'Choose all that apply')) + '</p>' : '') +
+              (q.note ? '<p class="q-sub" data-copy="q:' + q.id + ':note">' + esc(t('q:' + q.id + ':note', q.note)) + '</p>' : '') +
               '<div class="q-index"><span class="q-index__n">' + String(n).padStart(2, '0') + '</span>' +
                 '<span class="q-index__of">/ ' + qCount + '</span></div>' +
             '</div>' +
@@ -335,7 +361,7 @@
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
             '<p class="h2" style="font-weight:600">You don\'t need to beg or chase. You need to change what she feels when your name comes up.</p>' +
-            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The Jamo Dating Protocols team</p>' +
+            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The [BRAND] team</p>' +
           '</div>' +
           '<p class="q-sub" style="margin-top:22px">Built on published research into attachment and re-connection — ' +
             '<a href="#">[SOURCE 1]</a>, <a href="#">[SOURCE 2]</a>. Cite what you actually used.</p>' +
@@ -355,8 +381,8 @@
           '<div class="' + (dark ? 'split__col' : '') + '">' +
             '<div class="panel panel--narrow" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
               '<span class="eyebrow eyebrow--cold">Worth knowing</span>' +
-              '<h1 class="h1">' + esc(d.title) + '</h1>' +
-              '<p class="lede">' + esc(fillTemplate(d.body)) + '</p>' +
+              '<h1 class="h1" data-copy="i:' + d.id + ':title">' + esc(t('i:' + d.id + ':title', d.title)) + '</h1>' +
+              '<p class="lede" data-copy="i:' + d.id + ':body">' + esc(fillTemplate(t('i:' + d.id + ':body', d.body))) + '</p>' +
               '<div class="step__foot"><button class="btn' + (dark ? ' btn--light' : '') + '" type="button" data-act="next">Continue</button></div>' +
             '</div>' +
           '</div>' +
@@ -446,7 +472,13 @@
 
       mount.innerHTML = html;
       window.scrollTo(0, 0);
-      if (s.kind === 'loader') runLoader();
+      applyCopy(mount);
+      if (EDIT) {
+        enableEditing(mount);
+        var lbl = document.getElementById('editStep');
+        if (lbl) lbl.textContent = (i + 1) + '/' + steps.length;
+      }
+      if (s.kind === 'loader' && !EDIT) runLoader();
       var input = mount.querySelector('input');
       if (input && window.matchMedia('(min-width:900px)').matches) input.focus();
     }
@@ -556,6 +588,7 @@
 
       var choice = e.target.closest('[data-value]');
       if (!choice || s.kind !== 'question') return;
+      if (EDIT) return;   // editing copy, not taking the quiz
       var value = choice.getAttribute('data-value');
       var q = s.q;
 
@@ -592,6 +625,114 @@
     i = 0;
     history.replaceState({ step: 0 }, '', '#1');
     render();
+
+    if (EDIT) {
+      initCopy({
+        label: '1/' + steps.length,
+        prev: function () { goTo(Math.max(0, i - 1)); },
+        next: function () { goTo(Math.min(steps.length - 1, i + 1)); }
+      });
+    }
+  }
+
+  /* --------------------------------------------------------- edit mode
+     ?edit=1 turns every [data-copy] element into a text field in place. Edits
+     land in a localStorage draft so they survive reloads, and Download writes
+     a copy.js you drop into the project. Visitors never see any of this. */
+
+  function applyCopy(root) {
+    (root || document).querySelectorAll('[data-copy]').forEach(function (el) {
+      var id = el.getAttribute('data-copy');
+      var def = el.getAttribute('data-default');
+      if (def == null) def = el.textContent.trim();
+      if (DEFAULTS[id] == null) DEFAULTS[id] = def;
+      var raw = draft[id] != null ? draft[id] : (COPY[id] != null ? COPY[id] : def);
+      /* {first_name} and friends stay visible while editing so they can be
+         moved or removed; visitors get them filled in */
+      el.textContent = EDIT ? raw : fillTemplate(raw);
+    });
+  }
+
+  function enableEditing(root) {
+    (root || document).querySelectorAll('[data-copy]').forEach(function (el) {
+      if (el.dataset.editReady) return;
+      el.dataset.editReady = '1';
+      el.classList.add('is-editable');
+      el.setAttribute('contenteditable', 'plaintext-only');
+      el.setAttribute('spellcheck', 'true');
+      el.addEventListener('input', function () {
+        draft[el.getAttribute('data-copy')] = el.innerText.replace(/\s+$/, '');
+        saveDraft();
+        var b = document.getElementById('editCount');
+        if (b) b.textContent = Object.keys(draft).length;
+      });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); }
+        e.stopPropagation();
+      });
+      /* a label inside a button must not fire the button while you type */
+      el.addEventListener('click', function (e) { e.stopPropagation(); });
+    });
+  }
+
+  function download(name, text) {
+    var url = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  function copyFile() {
+    var all = {}, keys = Object.keys(DEFAULTS).sort();
+    keys.forEach(function (k) {
+      all[k] = draft[k] != null ? draft[k] : (COPY[k] != null ? COPY[k] : DEFAULTS[k]);
+    });
+    var lines = keys.map(function (k) {
+      return '  ' + JSON.stringify(k) + ': ' + JSON.stringify(all[k]) + ',';
+    });
+    return '/* copy.js — every string on the site, by id.\n' +
+           '   Generated from edit mode. Edit here or on the page with ?edit=1.\n' +
+           '   Loaded before funnel.js on every page. */\n' +
+           'window.COPY = {\n' + lines.join('\n') + '\n};\n';
+  }
+
+  function editBar(nav) {
+    if (document.getElementById('editBar')) return;
+    var bar = document.createElement('div');
+    bar.id = 'editBar';
+    bar.className = 'editbar';
+    bar.innerHTML =
+      '<span class="editbar__dot"></span>' +
+      '<span class="editbar__label">Editing copy · <b id="editCount">' + Object.keys(draft).length + '</b> changed</span>' +
+      (nav ? '<span class="editbar__nav">' +
+        '<button type="button" data-ed="prev" aria-label="Previous screen">‹</button>' +
+        '<span id="editStep">' + nav.label + '</span>' +
+        '<button type="button" data-ed="next" aria-label="Next screen">›</button>' +
+      '</span>' : '') +
+      '<button type="button" class="editbar__btn" data-ed="save">Download copy.js</button>' +
+      '<button type="button" class="editbar__btn editbar__btn--quiet" data-ed="reset">Discard</button>';
+    bar.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-ed]');
+      if (!b) return;
+      var a = b.getAttribute('data-ed');
+      if (a === 'save') download('copy.js', copyFile());
+      if (a === 'reset' && confirm('Discard all copy edits made in this browser?')) {
+        draft = {}; saveDraft(); location.reload();
+      }
+      if (a === 'prev' && nav) nav.prev();
+      if (a === 'next' && nav) nav.next();
+    });
+    document.body.appendChild(bar);
+    document.body.classList.add('is-editing');
+  }
+
+  /* static pages call this once; the quiz calls it after every render */
+  function initCopy(nav) {
+    applyCopy();
+    if (!EDIT) return;
+    enableEditing();
+    editBar(nav);
   }
 
   /* ------------------------------------------------------------- export */
@@ -603,6 +744,7 @@
     go: go,
     hydrate: hydrate,
     merges: mergeValues,
-    quiz: quiz
+    quiz: quiz,
+    copy: { init: initCopy, apply: applyCopy, file: copyFile, editing: EDIT, text: t }
   };
 })(window);

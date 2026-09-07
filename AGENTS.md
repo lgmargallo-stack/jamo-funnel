@@ -39,6 +39,18 @@ three pages are the post-quiz flow.
    bug, not a default.
 7c. **The loader runs 4 seconds total** (`total` in `runLoader`). It is a
    pause for effect, not a real computation; do not lengthen it.
+7e. **The scratch page stalls 2s on arrival** (`APPLY_STEPS` in scratch.html).
+   The bar advances on an uneven schedule — jump, crawl, hang, jump — because
+   a linear bar reads as a countdown. Do not "simplify" it back to linear, and
+   do not lengthen it.
+7g. **The scratch page fits one screen at every size.** No scrollbar: it is a
+   single moment. The card is the element that gives — width-led with a
+   height cap, never height-led (that made its derived width wider than the
+   phone). Height-based media queries compress the stack before anything is
+   removed.
+7f. **Selection states need more than a border.** A chosen tier moves border,
+   fill, inset ring and marker together, and `:hover` carries a
+   `:not(.is-on)` guard so it cannot out-rank selection on source order.
 8. **Ad params must survive every hop.** Use `Funnel.link()` / `Funnel.go()`
    for internal navigation — never a bare `href` between funnel pages.
 
@@ -62,6 +74,17 @@ funnel.css    all styling, mobile-first
 funnel.js     quiz engine, answer store, merge fields, param passthrough
 build-onefile.mjs  regenerates the single-file preview (optional)
 ```
+
+## Copy
+
+Every visible string carries a `data-copy="id"` (or comes from `t(id, default)`
+in the quiz renderers). `copy.js` overrides those ids; the markup default is
+the fallback. `?edit=1` turns the page into an editor and downloads a new
+copy.js. When you add UI, give its strings a `data-copy` id — copy that can
+only be changed in the markup is copy the owner cannot change.
+
+Prices and rebill terms are deliberately NOT editable copy: they live in
+`TIERS` in offer.html so they cannot drift from what the checkout charges.
 
 ## Placeholders to replace
 

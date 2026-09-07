@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Your plan</title>
+<title>[BRAND] — Your plan</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +16,7 @@
 
   <header class="topbar">
     <div class="topbar__side"></div>
-    <span class="wordmark">Jamo Dating Protocols</span>
+    <span class="wordmark">[BRAND]</span>
     <div class="topbar__side topbar__side--end"><span class="eyebrow eyebrow--cold">Plan ready</span></div>
   </header>
 
@@ -26,13 +26,8 @@
       <div class="planlayout__main">
 
         <div class="page__hero">
-          <h1 class="h1">
-            <span data-merge="first_name">there</span>, here's how you reopen things with <span data-merge="her_name">her</span>
-          </h1>
-          <p class="lede">
-            You said the hardest part is “<b data-merge="hardest_part">I never know what to say</b>”.
-            That's where week one starts — not with a message to her.
-          </p>
+          <h1 class="h1" data-copy="plan.h1" data-default="{first_name}, here's how you reopen things with {her_name}"></h1>
+          <p class="lede" data-copy="plan.lede" data-default="You said the hardest part is “{hardest_part}”. That's where week one starts — not with a message to her."></p>
         </div>
 
         <div class="factgrid">
@@ -43,42 +38,42 @@
 
         <div class="section">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
-            <h2 class="h2">Where you are, where this goes</h2>
+            <h2 class="h2" data-copy="plan.meters_h2">Where you are, where this goes</h2>
             <span class="eyebrow">Now → 30 days</span>
           </div>
 
           <div class="meters" id="meters"></div>
-          <p class="foot-note">Illustrative — not a predicted outcome</p>
+          <p class="foot-note" data-copy="plan.meters_note">Illustrative — not a predicted outcome</p>
         </div>
 
         <div class="section section--shade">
-          <h2 class="h2">Your plan covers what you picked</h2>
+          <h2 class="h2" data-copy="plan.modules_h2">Your plan covers what you picked</h2>
           <div class="modules">
             <div class="module">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
               <span><span class="module__t" data-merge="issue_1">Emotional distance</span><br>
-              <span class="module__m">Module 2 · 6 days · rebuilding what broke</span></span>
+              <span class="module__m" data-copy="plan.module1_meta">Module 2 · 6 days · rebuilding what broke</span></span>
             </div>
             <div class="module">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
               <span><span class="module__t" data-merge="issue_2">Different priorities</span><br>
-              <span class="module__m">Module 4 · 8 days · closing the gap</span></span>
+              <span class="module__m" data-copy="plan.module2_meta">Module 4 · 8 days · closing the gap</span></span>
             </div>
             <div class="module">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
-              <span><span class="module__t">The first message, written for your situation</span><br>
-              <span class="module__m">Module 6 · day 12</span></span>
+              <span><span class="module__t" data-copy="plan.module3_t">The first message, written for your situation</span><br>
+              <span class="module__m" data-copy="plan.module3_meta">Module 6 · day 12</span></span>
             </div>
             <div class="module" id="vitalityModule" hidden>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
-              <span><span class="module__t">Sleep and energy reset</span><br>
-              <span class="module__m">Runs alongside from day 1</span></span>
+              <span><span class="module__t" data-copy="plan.module4_t">Sleep and energy reset</span><br>
+              <span class="module__m" data-copy="plan.module4_meta">Runs alongside from day 1</span></span>
             </div>
           </div>
         </div>
 
         <div class="section">
-          <h2 class="h2">In 30 days you said you want</h2>
+          <h2 class="h2" data-copy="plan.outcomes_h2">In 30 days you said you want</h2>
           <div class="chips" id="outcomeChips"></div>
         </div>
 
@@ -94,7 +89,7 @@
             <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">Modules selected</span><span class="fact__v" id="moduleCount">6</span></div>
             <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">First action</span><span class="fact__v">Tonight</span></div>
           </div>
-          <button class="btn" type="button" data-go="offer.html">Get my plan</button>
+          <button class="btn" type="button" data-go="offer.html" data-copy="plan.cta">Get my plan</button>
           <p class="cta-note">Your <b>64% discount</b> is applied on the next screen.</p>
           <div style="height:1px;background:var(--line-2)"></div>
           <div style="display:flex;align-items:center;gap:14px">
@@ -113,15 +108,17 @@
   </div>
 
   <footer class="sitefoot">
-    <span>Jamo Health Consulting · 82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States</span>
+    <span>[COMPANY] · [ADDRESS]</span>
     <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
   </footer>
 
 </div>
 
+<script src="copy.js"></script>
 <script src="funnel.js"></script>
 <script>
 Funnel.hydrate();
+Funnel.copy.init();
 
 (function () {
   var a = Funnel.answers.read();
