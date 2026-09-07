@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Your plan</title>
+<title>Jamo Dating Protocols. Your plan</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609071216">
+<link rel="stylesheet" href="funnel.css?v=202609071259">
 </head>
 <body>
 
@@ -27,7 +27,7 @@
 
         <div class="page__hero">
           <h1 class="h1" data-copy="plan.h1" data-default="{first_name}, here's how you reopen things with {her_name}"></h1>
-          <p class="lede" data-copy="plan.lede" data-default="You said the hardest part is “{hardest_part}”. That's where week one starts — not with a message to her."></p>
+          <p class="lede" data-copy="plan.lede" data-default="You said the hardest part is “{hardest_part}”. That's where week one starts, and not with a message to her."></p>
         </div>
 
         <div class="factgrid">
@@ -43,7 +43,7 @@
           </div>
 
           <div class="meters" id="meters"></div>
-          <p class="foot-note" data-copy="plan.meters_note">Illustrative — not a predicted outcome</p>
+          <p class="foot-note" data-copy="plan.meters_note">Illustrative, not a predicted outcome</p>
         </div>
 
         <div class="section section--shade">
@@ -94,7 +94,7 @@
           <div style="height:1px;background:var(--line-2)"></div>
           <div style="display:flex;align-items:center;gap:14px">
             <span class="h2" style="color:var(--cold)">[N]</span>
-            <span class="module__m" data-copy="plan.rail_proof" data-default="men have run this plan. [Read what they said](#) — real reviews only.">men have run this plan. Read what they said — real reviews only.</span>
+            <span class="module__m" data-copy="plan.rail_proof" data-default="men have run this plan. [Read what they said](#), real reviews only.">men have run this plan. Read what they said, real reviews only.</span>
           </div>
         </div>
       </aside>
@@ -114,9 +114,9 @@
 
 </div>
 
-<script src="funnel.config.js?v=202609071216"></script>
-<script src="copy.js?v=202609071216"></script>
-<script src="funnel.js?v=202609071216"></script>
+<script src="funnel.config.js?v=202609071259"></script>
+<script src="copy.js?v=202609071259"></script>
+<script src="funnel.js?v=202609071259"></script>
 <script>
 Funnel.hydrate();
 Funnel.copy.init();
@@ -124,7 +124,7 @@ Funnel.copy.init();
 (function () {
   var a = Funnel.answers.read();
 
-  /* Meters: two rows of eight segments — now, then plan. The signal rail
+  /* Meters: two rows of eight segments, now and then plan. The signal rail
      from the quiz, reused. Values are illustrative and fixed by design. */
   var METERS = [
     { name: 'Attraction',    now: 2, plan: 7 },
@@ -149,7 +149,7 @@ Funnel.copy.init();
     return '<span class="chip' + (picked.indexOf(o) > -1 ? ' chip--on' : '') + '">' + o + '</span>';
   }).join('');
 
-  /* The vitality module only appears if he actually said something slipped —
+  /* The vitality module only appears if he actually said something slipped -
      the one place the page changes shape, and it earns the upsell later. */
   var slipped = (a.slipped || []).filter(function (s) { return s !== 'none'; });
   if (slipped.length) document.getElementById('vitalityModule').hidden = false;

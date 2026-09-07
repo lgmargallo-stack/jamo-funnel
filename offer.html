@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Choose your plan</title>
+<title>Jamo Dating Protocols. Choose your plan</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609071216">
+<link rel="stylesheet" href="funnel.css?v=202609071259">
 </head>
 <body>
 
@@ -33,7 +33,7 @@
       <h1 class="h1" data-copy="offer.h1" data-default="Your {goal_lower} plan, {first_name}"></h1>
       <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--warm-tint);border:1px solid var(--warm-line)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
-        <span style="font-size:13.5px;font-weight:600" data-copy="offer.promo" data-default="Promo {promo_code} applied — {discount}% off your first term"></span>
+        <span style="font-size:13.5px;font-weight:600" data-copy="offer.promo" data-default="Promo {promo_code} applied. {discount}% off your first term"></span>
       </div>
     </div>
 
@@ -45,7 +45,7 @@
       <button class="btn" type="button" data-checkout data-copy="offer.cta">Get my plan</button>
       <p class="disclosure">
         <span data-copy="offer.disclosure_head">Your plan renews automatically.</span> <b id="terms">$39.99 today, then $89.99 every 90 days</b> until you cancel.
-        <span data-copy="offer.disclosure_tail" data-default="Cancel in one click from your account or any receipt — no email required. [Subscription Terms](#).">Cancel in one click from your account or any receipt — no email required. Subscription Terms.</span>
+        <span data-copy="offer.disclosure_tail" data-default="Cancel in one click from your account or any receipt, no email required. [Subscription Terms](#).">Cancel in one click from your account or any receipt, no email required. Subscription Terms.</span>
       </p>
       <div class="paymarks">
         <span class="paymark">[VISA]</span><span class="paymark">[MC]</span>
@@ -96,9 +96,9 @@
 
 </div>
 
-<script src="funnel.config.js?v=202609071216"></script>
-<script src="copy.js?v=202609071216"></script>
-<script src="funnel.js?v=202609071216"></script>
+<script src="funnel.config.js?v=202609071259"></script>
+<script src="copy.js?v=202609071259"></script>
+<script src="funnel.js?v=202609071259"></script>
 <script>
 Funnel.hydrate();
 
@@ -154,7 +154,7 @@ availableFlag(t, n) +
 
   document.getElementById('tiers').innerHTML = TIERS.map(tierHTML).join('');
 
-  /* Order bump — omitted entirely when the config has none. */
+  /* Order bump, omitted entirely when the config has none. */
   var bump = cfg('bump', null);
   if (bump) {
     document.getElementById('bumpMount').innerHTML =
@@ -213,7 +213,7 @@ availableFlag(t, n) +
     });
   });
 
-  /* Session countdown. It does not reset on refresh — if it has run out, say
+  /* Session countdown. It does not reset on refresh; if it has run out, say
      so rather than restarting a fake clock. */
   var KEY = 'bq.deadline';
   var mins = cfg('flow.timerMinutes', 10);

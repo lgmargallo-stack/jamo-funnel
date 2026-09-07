@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Your discount</title>
+<title>Jamo Dating Protocols. Your discount</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="funnel.css?v=202609071216">
+<link rel="stylesheet" href="funnel.css?v=202609071259">
 </head>
 <body>
 
@@ -25,7 +25,7 @@
     <h1 class="h1" id="scratchTitle" data-copy="scratch.h1" data-default="Scratch to reveal your discount, {first_name}"></h1>
     <p class="lede" data-copy="scratch.lede">It applies automatically at checkout and holds for this session.</p>
     <!-- NOTE FOR THE BUILD, not for the visitor: everyone reveals the same
-         number, so call it "your discount" — never stage a random draw that
+         number, so call it "your discount", and never stage a random draw that
          always lands on 64%. Keep the percentage true against the list price. -->
 
     <div class="scratch" id="scratch">
@@ -71,9 +71,9 @@
   </div>
 </div>
 
-<script src="funnel.config.js?v=202609071216"></script>
-<script src="copy.js?v=202609071216"></script>
-<script src="funnel.js?v=202609071216"></script>
+<script src="funnel.config.js?v=202609071259"></script>
+<script src="copy.js?v=202609071259"></script>
+<script src="funnel.js?v=202609071259"></script>
 <script>
 Funnel.hydrate();
 Funnel.copy.init();
@@ -84,7 +84,7 @@ Funnel.copy.init();
       gaps the way discrete dots do;
    2. progress checked while dragging, not only on release, with a meter along
       the bottom edge so effort is visible;
-   3. a real reveal moment — the panel wipes, the number pops, a ring fires,
+   3. a real reveal moment: the panel wipes, the number pops, a ring fires,
       the device buzzes and a confirmation line appears. */
 (function () {
   var box   = document.getElementById('scratch');
@@ -213,7 +213,7 @@ Funnel.copy.init();
     btn.textContent = T('scratch.cta_done', 'See my plan');
     hint.textContent = T('scratch.hint_done', 'Applied automatically at checkout');
     /* the headline was an instruction; once it's done it should be the result.
-       copy.text returns the raw string — fill merge tokens for visitors. */
+       copy.text returns the raw string, so fill merge tokens for visitors. */
     var doneH1 = T('scratch.h1_done', '{discount}% off, locked in');
     title.textContent = Funnel.copy.editing ? doneH1 : Funnel.fill(doneH1);
     if (navigator.vibrate) { try { navigator.vibrate(28); } catch (e) {} }
@@ -234,7 +234,7 @@ Funnel.copy.init();
   cv.addEventListener('pointermove', function (e) {
     if (!drawing) return;
     /* coalesced events give the real path of a fast drag, not just its
-       sampled endpoints — this is what removes the "chunky" feel */
+       sampled endpoints; this is what removes the "chunky" feel */
     var events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     for (var i = 0; i < events.length; i++) stroke(events[i]);
   });
@@ -244,14 +244,14 @@ Funnel.copy.init();
   cv.addEventListener('pointerleave', function () { last = null; });
 
   /* The panel is a game, not a gate. The button always works: first press
-     reveals, second continues — so keyboard and screen-reader users are never
+     reveals, second continues, so keyboard and screen-reader users are never
      stuck behind a drag they cannot perform. */
   btn.addEventListener('click', function () {
     if (!revealed) { reveal(); return; }
     Funnel.go('plan');
   });
   setTimeout(function () {
-    if (!revealed) hint.textContent = 'Drag across the panel — or press the button to reveal it';
+    if (!revealed) hint.textContent = 'Drag across the panel, or press the button to reveal it';
   }, 6000);
 })();
 </script>

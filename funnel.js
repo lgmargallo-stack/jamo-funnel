@@ -55,8 +55,8 @@
   /* Registered before any page renders, so markup placeholders like [BRAND]
      and [COMPANY] resolve to this offer's names without being edited. */
   function seedBrandCopy() {
-    t('brand.wordmark', cfg('brand.name', '[BRAND]'));
-    t('foot.company', cfg('brand.company', '[COMPANY]') + ' · ' + cfg('brand.address', '[ADDRESS]'));
+    t('brand.wordmark', cfg('brand.name', 'Jamo Dating Protocols'));
+    t('foot.company', cfg('brand.company', 'Jamo Health Consulting') + ' · ' + cfg('brand.address', '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States'));
   }
 
   /* ---------------------------------------------------------------- data */
@@ -142,7 +142,7 @@
 
     { id: 'status', section: 1, kind: 'single',
       title: "What's your current relationship status?",
-      note: 'A one-tap opener. Whatever you pick, the next screen is the same — this shapes what your plan opens with, not where you go.',
+      note: 'Where things stand today, not where they have been.',
       options: ['Recently broke up', 'Single', "It's complicated", 'In a relationship', 'Married'] },
 
     { id: 'goal', section: 1, kind: 'single',
@@ -191,7 +191,7 @@
 
     { id: 'readiness', section: 3, kind: 'single',
       title: 'If she messaged you tonight, would you know what to say?',
-      note: 'Be honest — this is the gap the plan closes first.',
+      note: 'Be honest. This is usually the gap that matters most.',
       options: ['No idea', "I'd probably get it wrong", 'Roughly', 'Yes'] },
 
     { id: 'outcomes', section: 3, kind: 'multi',
@@ -211,7 +211,7 @@
       body: 'Wanting to {goal_lower} is not the hard part. Knowing the order to do things in is, and that is the whole of what your plan gives you.' },
     slipped: { id: 'insight', kind: 'insight',
       title: 'Every one of those is trainable',
-      body: "Trust and emotional distance aren't personality flaws — they're patterns, and patterns respond to a sequence. Your plan starts with the two you picked." }
+      body: "Trust and emotional distance aren't personality flaws. They're patterns, and patterns respond to a sequence. Your plan starts with the two you picked." }
   });
 
   var LOADER_PHASES = cfg('loader.phases', ['Mapping your situation', 'Scoring her signals', 'Selecting your modules']);
@@ -306,9 +306,9 @@
       outcome_2: outcomes[1] || d.outcome_2 || '',
       promo_code: promoCode(a.first_name),
       discount: String(cfg('flow.discountPct', 64)),
-      brand: cfg('brand.name', '[BRAND]'),
-      company: cfg('brand.company', '[COMPANY]'),
-      address: cfg('brand.address', '[ADDRESS]')
+      brand: cfg('brand.name', 'Jamo Dating Protocols'),
+      company: cfg('brand.company', 'Jamo Health Consulting'),
+      address: cfg('brand.address', '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States')
     };
   }
   function hydrate(root) {
@@ -470,9 +470,12 @@
         '</div>' +
         (o.section
           ? '<span class="eyebrow topbar__section">' + esc(o.section) + '</span>'
-          : C('brand.wordmark', cfg('brand.name', '[BRAND]'), 'span', 'class="wordmark"')) +
+          : C('brand.wordmark', cfg('brand.name', 'Jamo Dating Protocols'), 'span', 'class="wordmark"')) +
         '<div class="topbar__side topbar__side--end">' +
-          (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
+          /* hidden at >=900px, where .q-index carries the same number at a
+             size that earns its place. Two step counters on one screen is
+             decoration, not information. */
+          (o.count ? '<span class="eyebrow topbar__count">' + o.count + '</span>' : '') +
         '</div>' +
       '</header>';
     }
@@ -560,24 +563,24 @@
     function renderAuthority() {
       return '<div class="app fade">' +
         topbar({}) +
-        '<div class="panel panel--narrow" style="padding-top:26px">' +
-          C('i:authority:number', '[REAL NUMBER]', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
+        '<div class="mid"><div class="panel panel--narrow" style="padding-top:26px">' +
+          C('i:authority:number', '51,000+', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
           C('i:authority:number_sub', 'men have run this plan', 'p', 'class="h2" style="margin-bottom:26px"') +
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
             C('i:authority:quote',
               "You don't need to beg or chase. You need to change what she feels when your name comes up.",
               'p', 'class="h2" style="font-weight:600"') +
-            C('i:authority:attrib', 'The [BRAND] team',
+            C('i:authority:attrib', 'The Jamo Dating Protocols team',
               'p', 'class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0"') +
           '</div>' +
           C('i:authority:sources',
-            'Built on published research into attachment and re-connection — [SOURCE 1](#), [SOURCE 2](#). Cite what you actually used.',
+            'Built on published research into attachment and re-connection: [SOURCE 1](#), [SOURCE 2](#). Cite what you actually used.',
             'p', 'class="q-sub" style="margin-top:22px"') +
           '<div class="step__foot">' +
             C('i:authority:cta', 'Continue', 'button', 'class="btn" type="button" data-act="next"') +
           '</div>' +
-        '</div>' +
+        '</div></div>' +
       '</div>';
     }
 
@@ -588,7 +591,7 @@
       var dark = d.kind === 'insight';
       return '<div class="app fade' + (dark ? ' dark' : '') + '">' +
         topbar({}) +
-        '<div class="' + (dark ? 'split' : '') + '">' +
+        '<div class="mid ' + (dark ? 'split' : '') + '">' +
           '<div class="' + (dark ? 'split__col' : '') + '">' +
             '<div class="panel panel--narrow" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
               C('i:' + d.id + ':eyebrow', 'Worth knowing', 'span', 'class="eyebrow eyebrow--cold"') +
@@ -601,7 +604,7 @@
             '</div>' +
           '</div>' +
           (dark ? '<div class="split__col split__col--media">' +
-                    IMG('img.insight', 'media', '[PHOTO — MAN, EARLY MORNING, CALM]') +
+                    IMG('img.insight', 'media', '[PHOTO - MAN, EARLY MORNING, CALM]') +
                   '</div>' : '') +
         '</div>' +
       '</div>';
@@ -610,7 +613,7 @@
     function renderLoader() {
       return '<div class="app fade">' +
         topbar({ back: false }) +
-        '<div class="panel" style="padding-bottom:30px">' +
+        '<div class="mid"><div class="panel" style="padding-bottom:30px">' +
           C('loader.h1', 'Building your plan', 'h1', 'class="h2" style="margin-bottom:6px"') +
           C('loader.sub', 'Based on your ' + qCount + ' answers', 'p', 'class="q-sub"') +
         '</div>' +
@@ -620,7 +623,8 @@
           return '<div class="phase is-idle" data-phase="' + idx + '">' +
             '<div class="phase__head">' +
               C('loader.phase' + (idx + 1), name, 'span', 'class="phase__name"') +
-              '<span class="phase__pct">—</span><span class="phase__check">' + ICON.done + '</span></div>' +
+              /* em dash here is the "no value yet" glyph, not prose */
+            '<span class="phase__pct">—</span><span class="phase__check">' + ICON.done + '</span></div>' +
             '<div class="rail__group">' + segs + '</div>' +
           '</div>';
         }).join('') + '</div></div>' +
@@ -640,14 +644,14 @@
               C('review' + n + '.body', r.body, 'p', 'class="review__body"') +
             '</div>';
           }).join('') + '</div>' +
-        '</div>' +
+        '</div></div>' +
       '</div>';
     }
 
     function renderEmail() {
       return '<div class="app fade">' +
         topbar({}) +
-        '<div class="panel panel--centred" style="padding-top:26px">' +
+        '<div class="mid"><div class="panel panel--centred" style="padding-top:26px">' +
           C('email.eyebrow', 'Plan ready', 'span', 'class="eyebrow eyebrow--cold"') +
           C('email.h1', 'Where should we send your plan?', 'h1', 'class="h1"') +
           C('email.lede', "We'll email you a copy so you can come back to it. Your results open on the next screen either way.", 'p', 'class="lede"') +
@@ -658,7 +662,7 @@
               esc(t('email.placeholder', 'you@email.com')) + '" required>' +
           '</label>' +
           '<label class="checkrow"><input type="checkbox" name="optin"><span class="checkrow__box">' + ICON.tick + '</span>' +
-            C('email.optin', 'Also send me weekly tactics and updates. Separate from your plan — skip it and still continue.',
+            C('email.optin', 'Also send me weekly tactics and updates. Separate from your plan, so you can skip it and still continue.',
               'span', 'class="checkrow__text"') + '</label>' +
           C('email.privacy', "We don't sell your data and one click unsubscribes you. [Privacy Policy](#).",
             'p', 'class="checkrow__text" style="text-align:left"') +
@@ -666,14 +670,14 @@
             C('email.cta', 'Send my plan', 'button', 'class="btn" type="button" data-act="email"') +
             C('email.foot', 'Next: your name and hers', 'p', 'class="foot-note"') +
           '</div>' +
-        '</div>' +
+        '</div></div>' +
       '</div>';
     }
 
     function renderNames() {
       return '<div class="app fade">' +
         topbar({}) +
-        '<div class="panel panel--centred" style="padding-top:26px">' +
+        '<div class="mid"><div class="panel panel--centred" style="padding-top:26px">' +
           C('names.eyebrow', 'Last step', 'span', 'class="eyebrow eyebrow--cold"') +
           C('names.h1', 'Who is this plan for?', 'h1', 'class="h1"') +
           C('names.lede', "Both names go into your plan so the scripts read like something you'd actually send.", 'p', 'class="lede"') +
@@ -690,7 +694,7 @@
           '<div class="step__foot">' +
             C('names.cta', 'Continue', 'button', 'class="btn" type="button" data-act="names"') +
           '</div>' +
-        '</div>' +
+        '</div></div>' +
       '</div>';
     }
 
@@ -1079,7 +1083,7 @@
       if (a === 'clip') {
         toClipboard(copyFile(), function (ok) {
           var was = b.textContent;
-          b.textContent = ok ? 'Copied — paste into copy.js' : 'Press Cmd+C now';
+          b.textContent = ok ? 'Copied. Paste into copy.js' : 'Press Cmd+C now';
           setTimeout(function () { b.textContent = was; }, ok ? 2600 : 4000);
         });
       }

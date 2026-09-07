@@ -48,6 +48,14 @@ engine still runs if the config is missing.
    other accent is `--cold`. Do not introduce new colours; use the tokens at
    the top of `funnel.css`.
 7. **Minimum 44px hit targets** on anything tappable.
+7i. **Copy-only screens centre; question screens centre; nothing top-pins.**
+   `.mid` and `.step` use `justify-content:center` at >=900px. Top-pinning
+   left 200-380px of dead page under the button on every short screen.
+7j. **One step counter per screen.** Desktop shows `.q-index`; the topbar
+   counter hides above 900px. Two counters is decoration, not information.
+7k. **The question column is fluid, the display type is clamped.** A fixed
+   440px lede set the longest question in four lines. `clamp()` on `.q-title`
+   plus `flex:1 1 500px` keeps every question at two or three.
 7b. **One button placement rule, no exceptions:** the primary action is the
    last element of the column it completes, 28px below it, inheriting that
    column's alignment. Never pin it to the bottom of the viewport (it falls
@@ -93,6 +101,13 @@ engine still runs if the config is missing.
   so the funnel is presentable in review. Replace all three with real reviews
   before the first paid click, and change the meta line at the same time —
   never strip the "Sample review" label while the words are still invented.
+- No em dashes in visitor copy. The only one left is the loader's `%` column,
+  where it is a "no value yet" glyph rather than prose. Use a comma, a colon,
+  a semicolon or two sentences. Heavy em dash use is the clearest tell that a
+  human did not write the line.
+- Question `note` fields talk to the visitor, never about the machinery. "This
+  becomes the name of your plan on the results page" tells him he is filling in
+  a form; "Pick the one you would actually say out loud" asks him a question.
 - No invented user counts, no fabricated ratings, and no stock headshots on the
   review avatars: a face is a claim that the person exists. A photo goes in
   that slot only when the review is real and the person agreed to it — while
