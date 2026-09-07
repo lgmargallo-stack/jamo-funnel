@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jamo Dating Protocols — The smartest way to get her back</title>
+<meta name="description" content="A short quiz that builds your plan.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="funnel.css">
+</head>
+<body>
+
+<!-- The entire quiz lives here. Every question, interstitial, the loader,
+     email and names all render into this one element. No page ever loads
+     between them — the only navigation is the redirect to scratch.html
+     once the last step is done. -->
+<main id="quiz"></main>
+
+<script src="funnel.js"></script>
+<script>
+  Funnel.quiz({ mount: 'quiz' });
+
+  /* Tracking hooks — wire these to your pixel / CAPI.
+     Every step change pushes a step_view; the redirect fires quiz_complete.
+     Keep sid as the dedup key between browser and server events. */
+  // window.addEventListener('popstate', () => fbq('trackCustom','step_view'));
+</script>
+
+</body>
+</html>

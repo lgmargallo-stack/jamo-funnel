@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jamo Dating Protocols — Your discount</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="funnel.css">
+</head>
+<body>
+
+<div class="app">
+  <header class="topbar"><div class="topbar__side"></div>
+    <span class="wordmark">Jamo Dating Protocols</span>
+    <div class="topbar__side topbar__side--end"></div>
+  </header>
+
+  <div class="page" style="padding-top:20px">
+    <div class="planlayout" style="align-items:center">
+      <div class="planlayout__main" style="gap:20px">
+        <span class="eyebrow eyebrow--cold">One thing first</span>
+        <h1 class="h1">Scratch to reveal your discount, <span data-merge="first_name">there</span></h1>
+        <p class="lede">It applies automatically at checkout and holds for this session.</p>
+        <!-- NOTE FOR THE BUILD, not for the visitor: everyone reveals the same
+             number, so call it "your discount" — never stage a random draw that
+             always lands on 64%. Keep the percentage true against the list price. -->
+      </div>
+
+      <div class="planlayout__side" style="position:static">
+        <div class="scratch" id="scratch">
+          <div class="scratch__prize">
+            <span class="scratch__pct">64%</span>
+            <span class="scratch__sub">off your first plan</span>
+          </div>
+          <canvas id="scratchCanvas" aria-label="Scratch panel"></canvas>
+        </div>
+        <p class="foot-note" style="text-align:center;margin-top:14px" id="scratchHint">Drag across the panel to uncover it</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stickycta" style="margin-top:auto">
+    <button class="btn" id="continue" type="button">Scratch to continue</button>
+  </div>
+
+  <footer class="sitefoot">
+    <span>Jamo Health Consulting · 82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States</span>
+    <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
+  </footer>
+</div>
+
+<script src="funnel.js"></script>
+<script>
+Funnel.hydrate();
+
+/* Scratch panel. Pointer events cover mouse, touch and pen with one handler.
+   At 45% cleared we auto-reveal — nobody should have to scrub every pixel. */
+(function () {
+  var box = document.getElementById('scratch');
+  var cv = document.getElementById('scratchCanvas');
+  var btn = document.getElementById('continue');
+  var hint = document.getElementById('scratchHint');
+  var ctx = cv.getContext('2d');
+  var drawing = false, revealed = false;
+
+  function size() {
+    var r = box.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var stripe = ctx.createPattern(stripes(), 'repeat');
+    ctx.fillStyle = stripe; ctx.fillRect(0, 0, r.width, r.height);
+    ctx.globalCompositeOperation = 'destination-out';
+  }
+  function stripes() {
+    var c = document.createElement('canvas'); c.width = c.height = 22;
+    var x = c.getContext('2d');
+    x.fillStyle = '#1A1E24'; x.fillRect(0, 0, 22, 22);
+    x.strokeStyle = '#232830'; x.lineWidth = 11;
+    x.beginPath(); x.moveTo(-22, 22); x.lineTo(22, -22); x.moveTo(0, 44); x.lineTo(44, 0); x.stroke();
+    return c;
+  }
+  function scratch(e) {
+    var r = cv.getBoundingClientRect();
+    ctx.beginPath();
+    ctx.arc(e.clientX - r.left, e.clientY - r.top, 26, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  function cleared() {
+    var d = ctx.getImageData(0, 0, cv.width, cv.height).data, n = 0;
+    for (var i = 3; i < d.length; i += 40) { if (d[i] === 0) n++; }
+    return n / (d.length / 40);
+  }
+  function reveal() {
+    if (revealed) return;
+    revealed = true;
+    cv.style.transition = 'opacity .4s ease';
+    cv.style.opacity = '0';
+    cv.style.pointerEvents = 'none';
+    btn.textContent = 'See my plan';
+    hint.textContent = 'Applied automatically at checkout';
+    Funnel.answers.set('discount', 64);
+  }
+
+  size();
+  window.addEventListener('resize', function () { if (!revealed) size(); });
+  cv.addEventListener('pointerdown', function (e) { drawing = true; cv.setPointerCapture(e.pointerId); scratch(e); });
+  cv.addEventListener('pointermove', function (e) { if (drawing) scratch(e); });
+  cv.addEventListener('pointerup', function () {
+    drawing = false;
+    if (cleared() > 0.45) reveal();
+  });
+
+  /* The panel is a game, not a gate. The button always works: first press
+     reveals, second continues — so keyboard and screen-reader users are never
+     stuck behind a drag they cannot perform. */
+  btn.addEventListener('click', function () {
+    if (!revealed) { reveal(); return; }
+    Funnel.go('plan.html');
+  });
+  setTimeout(function () {
+    if (!revealed) hint.textContent = 'Drag across the panel — or press the button to reveal it';
+  }, 6000);
+})();
+</script>
+
+</body>
+</html>

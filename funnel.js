@@ -1,0 +1,596 @@
+/* ==========================================================================
+   Jamo Dating Protocols funnel — shared runtime.
+
+   Loaded by every page. Exposes:
+     Funnel.answers      read/write the quiz answer store (localStorage)
+     Funnel.link(href)   carries ad params across page loads
+     Funnel.hydrate()    fills [data-merge] slots on plan/offer pages
+     Funnel.quiz()       boots the single-page quiz (index.html only)
+
+   The quiz never navigates. Every question is a step rendered into one
+   container; the browser back button walks steps via history state. The only
+   real navigation is the redirect at the end -> scratch.html.
+   ========================================================================== */
+(function (global) {
+  'use strict';
+
+  /* ---------------------------------------------------------------- data */
+
+  // Ad/tracking params that must survive every hop in the funnel.
+  var PASS_THROUGH = [
+    'sid', 'source', 'adset_name', 'ad_name', 'placement', 'campaign_id',
+    'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+    'fbclid', 'ttclid', 'gclid', 'lang'
+  ];
+
+  var STORE = 'bq.answers.v1';
+
+  // One question = one object. Add, remove or reorder freely: the progress
+  // rail, the step count and the desktop index all read from this array.
+  var QUESTIONS = [
+    { id: 'age', section: 1, kind: 'age',
+      title: 'The smartest way to get her back',
+      sub: 'Select your age to begin',
+      options: [
+        { value: '18-29', label: '18–29' },
+        { value: '30-39', label: '30–39' },
+        { value: '40-49', label: '40–49' },
+        { value: '50+',   label: '50+' }
+      ] },
+
+    { id: 'status', section: 1, kind: 'single',
+      title: "What's your current relationship status?",
+      note: 'A one-tap opener. Whatever you pick, the next screen is the same — this shapes what your plan opens with, not where you go.',
+      options: ['Recently broke up', 'Single', "It's complicated", 'In a relationship', 'Married'] },
+
+    { id: 'goal', section: 1, kind: 'single',
+      title: 'What do you want most right now?',
+      note: 'This becomes the name of your plan on the results page.',
+      options: ['Get her back', 'Make her miss me', 'Rekindle the spark', 'Move on with confidence'] },
+
+    { id: 'who_ended', section: 1, kind: 'single',
+      title: 'Who ended it?',
+      note: 'The answer here changes the first line of your plan, not the plan itself.',
+      options: ['She left', 'I walked away and regret it', 'It was mutual'] },
+
+    { id: 'time_since', section: 1, kind: 'single',
+      title: 'How long ago did it end?',
+      note: 'How recent it is decides what week one asks you to do first.',
+      options: ['Days ago', 'A few weeks', '1–3 months', 'More than 3 months', "It's complicated"] },
+
+    { id: 'her_behaviour', section: 2, kind: 'single',
+      title: 'How is she acting since it ended?',
+      note: "There's no wrong answer. Every option describes a kind of uncertainty the plan is built to resolve.",
+      options: ['Hot and cold, hard to read', 'Cold and distant', 'Only messages when she needs something', 'Total silence', "She's seeing someone else"] },
+
+    { id: 'hardest_part', section: 2, kind: 'single',
+      title: "What's the hardest part right now?",
+      sub: "Pick the one that's loudest today.",
+      note: 'It becomes the opening line of your results.',
+      options: ["I can't stop thinking about her", "I keep checking what she's doing", 'I never know what to say', "I don't feel like myself"] },
+
+    { id: 'issues', section: 2, kind: 'multi',
+      title: 'What went wrong between you?',
+      sub: 'Choose all that apply',
+      note: 'Each one maps to a module in the plan you see at the end.',
+      options: ['Trust', 'Emotional distance', 'Different priorities', 'We argued too much', 'Outside interference', 'I stopped showing up', 'Something else'] },
+
+    { id: 'slipped', section: 2, kind: 'multi',
+      title: 'Since the breakup, which of these have slipped?',
+      sub: 'Choose all that apply',
+      note: 'Physical things slip after a breakup. Saying which ones lets the plan run alongside the rest.',
+      options: [
+        { value: 'sleep',    label: 'Sleep',             sub: "I'm awake at 3am" },
+        { value: 'energy',   label: 'Energy',            sub: 'Flat by mid-afternoon' },
+        { value: 'training', label: 'Training and drive', sub: "I've stopped showing up for myself" },
+        { value: 'appetite', label: 'Appetite',          sub: 'Eating badly or barely' },
+        { value: 'none',     label: 'Nothing physical' }
+      ] },
+
+    { id: 'readiness', section: 3, kind: 'single',
+      title: 'If she messaged you tonight, would you know what to say?',
+      note: 'Be honest — this is the gap the plan closes first.',
+      options: ['No idea', "I'd probably get it wrong", 'Roughly', 'Yes'] },
+
+    { id: 'outcomes', section: 3, kind: 'multi',
+      title: 'Where do you want to be in 30 days?',
+      sub: 'Choose all that apply',
+      note: 'These become the outcomes listed on your results page.',
+      options: ["She's texting first", "We're talking again", "I've stopped overthinking", 'Back together', 'Sleeping properly', 'Fit and sharp again'] }
+  ];
+
+  var SECTION_NAMES = { 1: 'Your situation', 2: 'Her signals & your patterns', 3: 'Readiness' };
+
+  // Interstitials sit between questions, keyed by the question they follow.
+  var INTERSTITIALS = {
+    age: { id: 'authority', kind: 'authority' },
+    goal: { id: 'relief', kind: 'relief',
+      title: "That's fixable — and faster than you think",
+      body: 'Wanting {goal} is not the hard part. Knowing the order to do things in is, and that is the whole of what your plan gives you.' },
+    slipped: { id: 'insight', kind: 'insight',
+      title: 'Every one of those is trainable',
+      body: "Trust and emotional distance aren't personality flaws — they're patterns, and patterns respond to a sequence. Your plan starts with the two you picked." }
+  };
+
+  var LOADER_PHASES = ['Mapping your situation', 'Scoring her signals', 'Selecting your modules'];
+
+  /* -------------------------------------------------------------- store */
+
+  function read() {
+    try { return JSON.parse(localStorage.getItem(STORE)) || {}; }
+    catch (e) { return {}; }
+  }
+  function write(data) {
+    try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {}
+  }
+  function set(key, value) { var d = read(); d[key] = value; write(d); return d; }
+
+  /* ------------------------------------------------------------- params */
+
+  function currentParams() {
+    var out = new URLSearchParams();
+    var here = new URLSearchParams(location.search);
+    PASS_THROUGH.forEach(function (k) { if (here.get(k)) out.set(k, here.get(k)); });
+    return out;
+  }
+  function link(href) {
+    var qs = currentParams().toString();
+    return qs ? href + (href.indexOf('?') > -1 ? '&' : '?') + qs : href;
+  }
+  function go(href) { location.href = link(href); }
+
+  /* ------------------------------------------------------------- merges */
+
+  function first(v, fallback) {
+    if (Array.isArray(v)) return v.length ? v[0] : fallback;
+    return v || fallback;
+  }
+  function promoCode(name) {
+    var d = new Date();
+    var mon = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'][d.getMonth()];
+    return (name || 'you').toLowerCase().replace(/[^a-z]/g, '') + '_' + mon + String(d.getFullYear()).slice(2);
+  }
+  function mergeValues() {
+    var a = read();
+    var issues = a.issues || [];
+    var outcomes = a.outcomes || [];
+    return {
+      first_name: a.first_name || 'there',
+      her_name: a.her_name || 'her',
+      status: a.status || 'Recently broke up',
+      goal: (a.goal || 'Get her back'),
+      goal_lower: (a.goal || 'Get her back').toLowerCase(),
+      time_since: a.time_since || 'recently',
+      hardest_part: a.hardest_part || "I never know what to say",
+      issue_1: issues[0] || 'Emotional distance',
+      issue_2: issues[1] || 'Different priorities',
+      issue_1_lower: (issues[0] || 'emotional distance').toLowerCase(),
+      issue_2_lower: (issues[1] || 'different priorities').toLowerCase(),
+      outcome_1: outcomes[0] || "She's texting first",
+      outcome_2: outcomes[1] || "I've stopped overthinking",
+      promo_code: promoCode(a.first_name)
+    };
+  }
+  function hydrate(root) {
+    var v = mergeValues();
+    (root || document).querySelectorAll('[data-merge]').forEach(function (el) {
+      var key = el.getAttribute('data-merge');
+      if (v[key] != null) el.textContent = v[key];
+    });
+  }
+  function fillTemplate(str) {
+    var v = mergeValues();
+    return String(str).replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
+  }
+
+  /* -------------------------------------------------------------- icons */
+
+  var ICON = {
+    back: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square"><path d="M15 5l-7 7 7 7"/></svg>',
+    chev: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#98A1AD" stroke-width="2" stroke-linecap="square"><path d="M9 5l7 7-7 7"/></svg>',
+    tick: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>',
+    done: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.5" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>',
+    quote: '<svg width="22" height="16" viewBox="0 0 22 16" fill="#2B34F0"><path d="M0 16V8.6C0 3.9 2.7.8 7 0l1 2.6C5.4 3.4 4 5 3.9 7.2H8V16H0zm13 0V8.6c0-4.7 2.7-7.8 7-8.6l1 2.6c-2.6.8-4 2.4-4.1 4.6H21V16h-8z"/></svg>'
+  };
+  var LETTERS = 'ABCDEFG';
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function opt(o) { return typeof o === 'string' ? { value: o, label: o } : o; }
+
+  /* --------------------------------------------------------------- quiz */
+
+  function quiz(opts) {
+    opts = opts || {};
+    var mount = document.getElementById(opts.mount || 'quiz');
+    if (!mount) return;
+
+    // Build the flat step list: questions with their interstitials woven in.
+    var steps = [];
+    QUESTIONS.forEach(function (q) {
+      steps.push({ kind: 'question', q: q });
+      if (INTERSTITIALS[q.id]) steps.push({ kind: 'interstitial', data: INTERSTITIALS[q.id] });
+    });
+    steps.push({ kind: 'loader' });
+    steps.push({ kind: 'email' });
+    steps.push({ kind: 'names' });
+
+    var qCount = QUESTIONS.length;                       // 11
+    var groups = [0, 0, 0];
+    QUESTIONS.forEach(function (q) { groups[q.section - 1]++; });   // 5 / 4 / 2
+
+    var i = 0;
+    var loaderTimer = null;
+
+    function questionNumber(q) { return QUESTIONS.indexOf(q) + 1; }
+
+    function railHTML(filled) {
+      var n = 0;
+      return '<div class="rail">' + groups.map(function (g) {
+        var segs = '';
+        for (var k = 0; k < g; k++) { n++; segs += '<span class="rail__seg' + (n <= filled ? ' is-on' : '') + '"></span>'; }
+        return '<div class="rail__group" style="flex-grow:' + g + '">' + segs + '</div>';
+      }).join('') + '</div>';
+    }
+
+    function topbar(o) {
+      o = o || {};
+      return '<header class="topbar">' +
+        '<div class="topbar__side">' +
+          (o.back === false ? '' : '<button class="iconbtn" type="button" data-act="back" aria-label="Go back">' + ICON.back + '</button>') +
+        '</div>' +
+        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || 'Jamo Dating Protocols') + '</span>' +
+        '<div class="topbar__side topbar__side--end">' +
+          (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
+        '</div>' +
+      '</header>';
+    }
+
+    /* --- renderers --- */
+
+    function renderAge(q) {
+      return '<div class="app fade">' +
+        topbar({ back: false }) +
+        '<div class="panel" style="padding-bottom:26px">' +
+          '<h1 class="h1" style="margin-bottom:10px">' + esc(q.title) + '</h1>' +
+          '<p class="eyebrow">' + esc(q.sub) + '</p>' +
+        '</div>' +
+        '<div class="panel">' +
+          '<div class="agegrid">' + q.options.map(function (o) {
+            return '<button class="agecard" type="button" data-value="' + esc(o.value) + '">' +
+              '<span class="agecard__ph">[PHOTO ' + esc(o.label) + ']</span>' +
+              '<span class="agecard__foot"><span class="agecard__label">' + esc(o.label) + '</span>' + ICON.chev + '</span>' +
+            '</button>';
+          }).join('') + '</div>' +
+        '</div>' +
+        '<div class="step__foot"><p class="cta-note">By continuing you agree to our <a href="#">Terms</a>, ' +
+          '<a href="#">Privacy Policy</a> and <a href="#">Subscription Terms</a>.</p></div>' +
+      '</div>';
+    }
+
+    function renderQuestion(q) {
+      var n = questionNumber(q);
+      var multi = q.kind === 'multi';
+      var picked = read()[q.id] || (multi ? [] : null);
+
+      var options = q.options.map(function (raw, idx) {
+        var o = opt(raw);
+        var on = multi ? picked.indexOf(o.value) > -1 : picked === o.value;
+        var marker = multi
+          ? '<span class="opt__box">' + ICON.tick + '</span>'
+          : '<span class="opt__key">' + LETTERS[idx] + '</span>';
+        var text = o.sub
+          ? '<span class="opt__text"><span class="opt__label">' + esc(o.label) + '</span><span class="opt__sub">' + esc(o.sub) + '</span></span>'
+          : '<span class="opt__label">' + esc(o.label) + '</span>';
+        return '<button class="opt' + (on ? ' is-on' : '') + '" type="button" data-value="' + esc(o.value) + '"' +
+          (multi ? ' aria-pressed="' + (on ? 'true' : 'false') + '"' : '') + '>' + marker + text + '</button>';
+      }).join('');
+
+      return '<div class="app fade">' +
+        topbar({ section: SECTION_NAMES[q.section], count: String(n).padStart(2, '0') + '/' + qCount }) +
+        '<div class="quiz__rail">' + railHTML(n) + '</div>' +
+        '<div class="step">' +
+          '<div class="step__body">' +
+            '<div class="step__lede">' +
+              '<span class="eyebrow eyebrow--cold">' + esc(SECTION_NAMES[q.section]) + '</span>' +
+              '<h1 class="q-title">' + esc(q.title) + '</h1>' +
+              (q.sub && !multi ? '<p class="q-sub">' + esc(q.sub) + '</p>' : '') +
+              (multi ? '<p class="eyebrow">' + esc(q.sub || 'Choose all that apply') + '</p>' : '') +
+              (q.note ? '<p class="q-sub">' + esc(q.note) + '</p>' : '') +
+              '<div class="q-index"><span class="q-index__n">' + String(n).padStart(2, '0') + '</span>' +
+                '<span class="q-index__of">/ ' + qCount + '</span></div>' +
+            '</div>' +
+            '<div class="options">' + options + '</div>' +
+          '</div>' +
+          '<div class="step__foot">' +
+            (multi
+              ? '<p class="foot-note foot-note--live" data-count>' + picked.length + ' selected</p>' +
+                '<button class="btn" type="button" data-act="next"' + (picked.length ? '' : ' disabled') + '>Continue</button>'
+              : '<p class="foot-note">Tap an answer to continue</p>') +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderAuthority() {
+      return '<div class="app fade">' +
+        topbar({}) +
+        '<div class="panel" style="padding-top:26px">' +
+          '<p class="h1" style="color:var(--cold);margin-bottom:6px">[REAL NUMBER]</p>' +
+          '<p class="h2" style="margin-bottom:26px">men have run this plan</p>' +
+          '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
+            ICON.quote +
+            '<p class="h2" style="font-weight:600">You don\'t need to beg or chase. You need to change what she feels when your name comes up.</p>' +
+            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The Jamo Dating Protocols team</p>' +
+          '</div>' +
+          '<p class="q-sub" style="margin-top:22px">Built on published research into attachment and re-connection — ' +
+            '<a href="#">[SOURCE 1]</a>, <a href="#">[SOURCE 2]</a>. Cite what you actually used.</p>' +
+        '</div>' +
+        '<div class="step__foot"><button class="btn" type="button" data-act="next">Continue</button></div>' +
+      '</div>';
+    }
+
+    function renderBeat(d) {
+      var dark = d.kind === 'insight';
+      return '<div class="app fade' + (dark ? ' dark' : '') + '">' +
+        topbar({}) +
+        '<div class="split">' +
+          '<div class="split__col">' +
+            '<div class="panel" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
+              '<span class="eyebrow eyebrow--cold">Worth knowing</span>' +
+              '<h1 class="h1">' + esc(d.title) + '</h1>' +
+              '<p class="lede">' + esc(fillTemplate(d.body)) + '</p>' +
+            '</div>' +
+          '</div>' +
+          (dark ? '<div class="split__col split__col--media"><div class="media">[PHOTO — MAN, EARLY MORNING, CALM]</div></div>' : '') +
+        '</div>' +
+        '<div class="step__foot"><button class="btn' + (dark ? ' btn--light' : '') + '" type="button" data-act="next">Continue</button></div>' +
+      '</div>';
+    }
+
+    function renderLoader() {
+      return '<div class="app fade">' +
+        topbar({ back: false }) +
+        '<div class="panel" style="padding-bottom:30px">' +
+          '<h1 class="h2" style="margin-bottom:6px">Building your plan</h1>' +
+          '<p class="q-sub">Based on your ' + qCount + ' answers</p>' +
+        '</div>' +
+        '<div class="panel"><div class="phases">' + LOADER_PHASES.map(function (name, idx) {
+          var segs = '';
+          for (var k = 0; k < 12; k++) segs += '<span class="rail__seg"></span>';
+          return '<div class="phase is-idle" data-phase="' + idx + '">' +
+            '<div class="phase__head"><span class="phase__name">' + esc(name) + '</span>' +
+              '<span class="phase__pct">—</span><span class="phase__check">' + ICON.done + '</span></div>' +
+            '<div class="rail__group">' + segs + '</div>' +
+          '</div>';
+        }).join('') + '</div></div>' +
+        '<div class="panel" style="padding-top:40px;padding-bottom:34px">' +
+          '<p class="eyebrow" style="margin-bottom:14px">What men say after week one</p>' +
+          '<div class="reviews">' + [1, 2, 3].map(function () {
+            return '<div class="card"><div class="review__head"><span class="review__av">[I]</span>' +
+              '<span><span class="review__name">[REAL NAME]</span><br><span class="review__meta">[VERIFIED · DATE]</span></span></div>' +
+              '<p class="review__body">[Paste a real review. Collect five before launch — do not ship invented ones.]</p></div>';
+          }).join('') + '</div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function renderEmail() {
+      return '<div class="app fade">' +
+        topbar({}) +
+        '<div class="panel panel--centred" style="padding-top:26px">' +
+          '<span class="eyebrow eyebrow--cold">Plan ready</span>' +
+          '<h1 class="h1">Where should we send your plan?</h1>' +
+          '<p class="lede">We\'ll email you a copy so you can come back to it. Your results open on the next screen either way.</p>' +
+        '</div>' +
+        '<div class="panel panel--centred" style="padding-top:26px;gap:18px">' +
+          '<label class="field" style="width:100%">' +
+            '<input type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required>' +
+          '</label>' +
+          '<label class="checkrow"><input type="checkbox" name="optin"><span class="checkrow__box">' + ICON.tick + '</span>' +
+            '<span class="checkrow__text">Also send me weekly tactics and updates. Separate from your plan — skip it and still continue.</span></label>' +
+          '<p class="checkrow__text" style="text-align:left">We don\'t sell your data and one click unsubscribes you. <a href="#">Privacy Policy</a>.</p>' +
+        '</div>' +
+        '<div class="step__foot"><button class="btn" type="button" data-act="email">Send my plan</button>' +
+          '<p class="foot-note">Next: your name and hers</p></div>' +
+      '</div>';
+    }
+
+    function renderNames() {
+      return '<div class="app fade">' +
+        topbar({}) +
+        '<div class="panel panel--centred" style="padding-top:26px">' +
+          '<span class="eyebrow eyebrow--cold">Last step</span>' +
+          '<h1 class="h1">Who is this plan for?</h1>' +
+          '<p class="lede">Both names go into your plan so the scripts read like something you\'d actually send.</p>' +
+        '</div>' +
+        '<div class="panel panel--centred" style="padding-top:26px;gap:16px">' +
+          '<div style="width:100%"><span class="field__label">Your first name</span>' +
+            '<label class="field"><input type="text" name="first_name" autocomplete="given-name" placeholder="Alex" required></label></div>' +
+          '<div style="width:100%"><span class="field__label">Her name</span>' +
+            '<label class="field"><input type="text" name="her_name" placeholder="Type her name" required></label></div>' +
+          '<p class="checkrow__text" style="text-align:left">Names stay on your plan. We never message anyone on your behalf.</p>' +
+        '</div>' +
+        '<div class="step__foot"><button class="btn" type="button" data-act="names">Continue</button></div>' +
+      '</div>';
+    }
+
+    /* --- step machine --- */
+
+    function render() {
+      if (loaderTimer) { clearInterval(loaderTimer); loaderTimer = null; }
+      var s = steps[i];
+      var html;
+      if (s.kind === 'question') html = s.q.kind === 'age' ? renderAge(s.q) : renderQuestion(s.q);
+      else if (s.kind === 'interstitial') html = s.data.kind === 'authority' ? renderAuthority() : renderBeat(s.data);
+      else if (s.kind === 'loader') html = renderLoader();
+      else if (s.kind === 'email') html = renderEmail();
+      else html = renderNames();
+
+      mount.innerHTML = html;
+      window.scrollTo(0, 0);
+      if (s.kind === 'loader') runLoader();
+      var input = mount.querySelector('input');
+      if (input && window.matchMedia('(min-width:900px)').matches) input.focus();
+    }
+
+    function goTo(n, push) {
+      i = Math.max(0, Math.min(steps.length - 1, n));
+      if (push !== false) history.pushState({ step: i }, '', '#' + (i + 1));
+      render();
+    }
+    function next() { if (i < steps.length - 1) goTo(i + 1); else finish(); }
+
+    function finish() { go('scratch.html'); }
+
+    /* --- loader: three phases, one micro-commitment modal at phase 2 --- */
+
+    function runLoader() {
+      var fast = new URLSearchParams(location.search).get('fast') === '1';
+      var phaseMs = fast ? 2500 : 22000;   // ~66s total, matching the design
+      var phase = 0, pct = 0, paused = false, asked = false;
+      var els = mount.querySelectorAll('.phase');
+
+      function paint() {
+        els.forEach(function (el, idx) {
+          var segs = el.querySelectorAll('.rail__seg');
+          var p = idx < phase ? 100 : idx === phase ? pct : 0;
+          el.className = 'phase ' + (idx < phase ? 'is-done' : idx === phase ? 'is-live' : 'is-idle');
+          el.querySelector('.phase__pct').textContent = idx === phase ? p + '%' : '—';
+          segs.forEach(function (seg, k) {
+            seg.classList.toggle('is-on', (k + 1) / segs.length * 100 <= p);
+          });
+        });
+      }
+      paint();
+
+      loaderTimer = setInterval(function () {
+        if (paused) return;
+        pct += Math.ceil(100 / (phaseMs / 250));
+        if (phase === 1 && pct >= 50 && !asked) {
+          asked = true; paused = true;
+          ask('Are you someone who finishes what you start?', function () { paused = false; });
+        }
+        if (pct >= 100) { pct = 0; phase++; }
+        if (phase >= LOADER_PHASES.length) { clearInterval(loaderTimer); loaderTimer = null; next(); return; }
+        paint();
+      }, 250);
+    }
+
+    function ask(question, done) {
+      var wrap = document.createElement('div');
+      wrap.className = 'modal';
+      wrap.innerHTML = '<div class="modal__card" role="dialog" aria-modal="true">' +
+        '<span class="eyebrow">One quick thing</span>' +
+        '<h2 class="modal__title">' + esc(question) + '</h2>' +
+        '<div class="modal__actions">' +
+          '<button class="btn btn--quiet" type="button" data-a="no">No</button>' +
+          '<button class="btn" type="button" data-a="yes">Yes</button>' +
+        '</div></div>';
+      wrap.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-a]');
+        if (!b) return;
+        set('commitment', b.getAttribute('data-a'));
+        wrap.remove();
+        done();
+      });
+      document.body.appendChild(wrap);
+      wrap.querySelector('[data-a="yes"]').focus();
+    }
+
+    /* --- events --- */
+
+    mount.addEventListener('click', function (e) {
+      var s = steps[i];
+
+      var back = e.target.closest('[data-act="back"]');
+      if (back) { history.back(); return; }
+
+      var nextBtn = e.target.closest('[data-act="next"]');
+      if (nextBtn) {
+        if (s.kind === 'question' && s.q.kind === 'multi') {
+          var picked = read()[s.q.id] || [];
+          if (!picked.length) return;
+        }
+        next(); return;
+      }
+
+      if (e.target.closest('[data-act="email"]')) {
+        var email = mount.querySelector('input[name="email"]');
+        if (!email || !email.checkValidity() || !email.value) { email && email.reportValidity(); return; }
+        set('email', email.value.trim());
+        set('marketing_optin', !!mount.querySelector('input[name="optin"]:checked'));
+        next(); return;
+      }
+
+      if (e.target.closest('[data-act="names"]')) {
+        var fn = mount.querySelector('input[name="first_name"]');
+        var hn = mount.querySelector('input[name="her_name"]');
+        if (!fn.value.trim()) { fn.reportValidity(); return; }
+        set('first_name', fn.value.trim());
+        set('her_name', hn.value.trim());
+        next(); return;
+      }
+
+      var choice = e.target.closest('[data-value]');
+      if (!choice || s.kind !== 'question') return;
+      var value = choice.getAttribute('data-value');
+      var q = s.q;
+
+      if (q.kind === 'multi') {
+        var list = read()[q.id] || [];
+        var at = list.indexOf(value);
+        if (at > -1) list.splice(at, 1); else list.push(value);
+        set(q.id, list);
+        choice.classList.toggle('is-on');
+        choice.setAttribute('aria-pressed', at > -1 ? 'false' : 'true');
+        var label = mount.querySelector('[data-count]');
+        var btn = mount.querySelector('[data-act="next"]');
+        if (label) label.textContent = list.length + ' selected';
+        if (btn) btn.disabled = !list.length;
+        return;
+      }
+
+      set(q.id, value);
+      mount.querySelectorAll('.opt, .agecard').forEach(function (el) { el.classList.remove('is-on'); });
+      choice.classList.add('is-on');
+      setTimeout(next, 160);   // brief confirmation, then advance
+    });
+
+    window.addEventListener('popstate', function (e) {
+      var n = (e.state && typeof e.state.step === 'number') ? e.state.step : 0;
+      i = Math.max(0, Math.min(steps.length - 1, n));
+      render();
+    });
+
+    // Resume where they left off if they reload mid-quiz.
+    var startAt = 0;
+    var saved = read();
+    for (var k = 0; k < steps.length; k++) {
+      var st = steps[k];
+      if (st.kind === 'question') {
+        var v = saved[st.q.id];
+        if (v == null || (Array.isArray(v) && !v.length)) { startAt = k; break; }
+      }
+      startAt = k;
+    }
+    i = Math.min(startAt, steps.length - 1);
+    history.replaceState({ step: i }, '', '#' + (i + 1));
+    render();
+  }
+
+  /* ------------------------------------------------------------- export */
+
+  global.Funnel = {
+    QUESTIONS: QUESTIONS,
+    answers: { read: read, write: write, set: set },
+    link: link,
+    go: go,
+    hydrate: hydrate,
+    merges: mergeValues,
+    quiz: quiz
+  };
+})(window);

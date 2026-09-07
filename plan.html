@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jamo Dating Protocols — Your plan</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="funnel.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar__side"></div>
+    <span class="wordmark">Jamo Dating Protocols</span>
+    <div class="topbar__side topbar__side--end"><span class="eyebrow eyebrow--cold">Plan ready</span></div>
+  </header>
+
+  <div class="page">
+    <div class="planlayout">
+
+      <div class="planlayout__main">
+
+        <div class="page__hero">
+          <h1 class="h1">
+            <span data-merge="first_name">there</span>, here's how you reopen things with <span data-merge="her_name">her</span>
+          </h1>
+          <p class="lede">
+            You said the hardest part is “<b data-merge="hardest_part">I never know what to say</b>”.
+            That's where week one starts — not with a message to her.
+          </p>
+        </div>
+
+        <div class="factgrid">
+          <div class="fact"><span class="eyebrow">Status</span><span class="fact__v" data-merge="status">Recently broke up</span></div>
+          <div class="fact"><span class="eyebrow">Goal</span><span class="fact__v" data-merge="goal">Get her back</span></div>
+          <div class="fact"><span class="eyebrow">Time since</span><span class="fact__v" data-merge="time_since">A few weeks</span></div>
+        </div>
+
+        <div class="section">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
+            <h2 class="h2">Where you are, where this goes</h2>
+            <span class="eyebrow">Now → 30 days</span>
+          </div>
+
+          <div class="meters" id="meters"></div>
+          <p class="foot-note">Illustrative — not a predicted outcome</p>
+        </div>
+
+        <div class="section section--shade">
+          <h2 class="h2">Your plan covers what you picked</h2>
+          <div class="modules">
+            <div class="module">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
+              <span><span class="module__t" data-merge="issue_1">Emotional distance</span><br>
+              <span class="module__m">Module 2 · 6 days · rebuilding what broke</span></span>
+            </div>
+            <div class="module">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
+              <span><span class="module__t" data-merge="issue_2">Different priorities</span><br>
+              <span class="module__m">Module 4 · 8 days · closing the gap</span></span>
+            </div>
+            <div class="module">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
+              <span><span class="module__t">The first message, written for your situation</span><br>
+              <span class="module__m">Module 6 · day 12</span></span>
+            </div>
+            <div class="module" id="vitalityModule" hidden>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 18px;margin-top:2px"><path d="M4 12l6 6L20 6"/></svg>
+              <span><span class="module__t">Sleep and energy reset</span><br>
+              <span class="module__m">Runs alongside from day 1</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2 class="h2">In 30 days you said you want</h2>
+          <div class="chips" id="outcomeChips"></div>
+        </div>
+
+      </div>
+
+      <aside class="planlayout__side">
+        <div class="railcard">
+          <span class="eyebrow">Your plan</span>
+          <span class="h2"><span data-merge="goal">Get her back</span> · 12 weeks</span>
+          <div style="height:1px;background:var(--line-2)"></div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">Daily commitment</span><span class="fact__v">10 minutes</span></div>
+            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">Modules selected</span><span class="fact__v" id="moduleCount">6</span></div>
+            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">First action</span><span class="fact__v">Tonight</span></div>
+          </div>
+          <button class="btn" type="button" data-go="offer.html">Get my plan</button>
+          <p class="cta-note">Your <b>64% discount</b> is applied on the next screen.</p>
+          <div style="height:1px;background:var(--line-2)"></div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <span class="h2" style="color:var(--cold)">[N]</span>
+            <span class="module__m">men have run this plan. <a href="#">Read what they said</a> — real reviews only.</span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
+  <div class="stickycta stickycta--dup">
+    <button class="btn" type="button" data-go="offer.html">Get my plan</button>
+    <p class="cta-note">Your <b>64% discount</b> is applied on the next screen.</p>
+  </div>
+
+  <footer class="sitefoot">
+    <span>Jamo Health Consulting · 82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States</span>
+    <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
+  </footer>
+
+</div>
+
+<script src="funnel.js"></script>
+<script>
+Funnel.hydrate();
+
+(function () {
+  var a = Funnel.answers.read();
+
+  /* Meters: two rows of eight segments — now, then plan. The signal rail
+     from the quiz, reused. Values are illustrative and fixed by design. */
+  var METERS = [
+    { name: 'Attraction',    now: 2, plan: 7 },
+    { name: 'Her interest',  now: 3, plan: 6 },
+    { name: 'Your headspace', now: 1, plan: 8 }
+  ];
+  document.getElementById('meters').innerHTML = METERS.map(function (m) {
+    function row(n, cls) {
+      var out = '';
+      for (var i = 0; i < 8; i++) out += '<span class="meter__seg' + (i < n ? ' ' + cls : '') + '"></span>';
+      return '<div class="meter__row">' + out + '</div>';
+    }
+    return '<div class="meter"><div class="meter__head"><span class="meter__name">' + m.name + '</span></div>' +
+      row(m.now, 'is-now') + row(m.plan, 'is-plan') + '</div>';
+  }).join('');
+
+  /* Outcomes he picked lead; the rest sit behind them, greyed. */
+  var picked = a.outcomes || [];
+  var ALL = ["She's texting first", "We're talking again", "I've stopped overthinking", 'Back together', 'Sleeping properly', 'Fit and sharp again'];
+  var ordered = picked.concat(ALL.filter(function (o) { return picked.indexOf(o) === -1; }));
+  document.getElementById('outcomeChips').innerHTML = ordered.map(function (o) {
+    return '<span class="chip' + (picked.indexOf(o) > -1 ? ' chip--on' : '') + '">' + o + '</span>';
+  }).join('');
+
+  /* The vitality module only appears if he actually said something slipped —
+     the one place the page changes shape, and it earns the upsell later. */
+  var slipped = (a.slipped || []).filter(function (s) { return s !== 'none'; });
+  if (slipped.length) document.getElementById('vitalityModule').hidden = false;
+  document.getElementById('moduleCount').textContent = 4 + (a.issues || []).length;
+
+  document.querySelectorAll('[data-go]').forEach(function (b) {
+    b.addEventListener('click', function () { Funnel.go(b.getAttribute('data-go')); });
+  });
+})();
+</script>
+
+</body>
+</html>

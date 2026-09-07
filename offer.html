@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jamo Dating Protocols — Choose your plan</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="funnel.css">
+</head>
+<body>
+
+<div class="app">
+
+  <div class="offerbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <span class="wordmark" style="color:#fff">Jamo Dating Protocols</span>
+      <span style="width:1px;height:22px;background:#2A2F38"></span>
+      <span style="display:flex;flex-direction:column">
+        <span class="eyebrow">Your discount holds for</span>
+        <span class="offerbar__timer" id="timer">10:00</span>
+      </span>
+    </div>
+    <button class="btn btn--light btn--inline" type="button" data-checkout>Get my plan</button>
+  </div>
+
+  <div class="page">
+
+    <div class="page__hero" style="align-items:flex-start">
+      <span class="eyebrow eyebrow--cold">Step 2 of 2</span>
+      <h1 class="h1">Your <span data-merge="goal_lower">get her back</span> plan, <span data-merge="first_name">there</span></h1>
+      <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--warm-tint);border:1px solid var(--warm-line)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
+        <span style="font-size:13.5px;font-weight:600">Promo <span class="mono" style="font-size:11px" data-merge="promo_code">you_sep26</span> applied — 64% off your first term</span>
+      </div>
+    </div>
+
+    <div class="tiers" id="tiers">
+
+      <button class="tier" type="button" data-tier="4w">
+        <span class="tier__row">
+          <span style="display:flex;flex-direction:column;gap:3px">
+            <span class="tier__name">4-week plan</span>
+            <span class="tier__perday">$0.86 per day</span>
+          </span>
+          <span class="tier__prices"><span class="tier__was">$54.99</span><span class="tier__now">$23.99</span></span>
+        </span>
+        <span class="tier__blurb">Enough to run the first reset and the opening message.</span>
+      </button>
+
+      <div class="tier tier--pick">
+        <span class="tier__flag">
+          <span class="eyebrow">Most men choose this</span>
+          <span class="tier__save">SAVE 53%</span>
+        </span>
+        <button class="tier__inner" type="button" data-tier="12w" style="width:100%;text-align:left">
+          <span class="tier__row">
+            <span style="display:flex;flex-direction:column;gap:3px">
+              <span class="tier__name">12-week plan</span>
+              <span class="tier__perday">$0.47 per day</span>
+            </span>
+            <span class="tier__prices"><span class="tier__was">$84.99</span><span class="tier__now">$39.99</span></span>
+          </span>
+          <span class="tier__blurb">The full sequence, with enough runway for the conversation to actually restart.</span>
+        </button>
+      </div>
+
+      <button class="tier" type="button" data-tier="24w">
+        <span class="tier__row">
+          <span style="display:flex;flex-direction:column;gap:3px">
+            <span class="tier__name">24-week plan</span>
+            <span class="tier__perday">$0.44 per day</span>
+          </span>
+          <span class="tier__prices"><span class="tier__was">$114.99</span><span class="tier__now">$74.99</span></span>
+        </span>
+        <span class="tier__blurb">For long relationships, where rebuilding takes more than one season.</span>
+      </button>
+
+    </div>
+
+    <label class="bump" style="margin-top:16px">
+      <input type="checkbox" id="bump" style="position:absolute;opacity:0;width:0;height:0">
+      <span class="checkrow__box" style="margin-top:2px">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="square"><path d="M4 12l6 6L20 6"/></svg>
+      </span>
+      <span>
+        <span class="bump__t">Add: 30 Texts That Reopen the Conversation</span><br>
+        <span class="bump__d">The exact messages, scripted per situation. <span class="bump__price">+$24</span> one time, added to this order.</span>
+      </span>
+    </label>
+
+    <div class="section" style="gap:16px">
+      <button class="btn" type="button" data-checkout>Get my plan</button>
+      <p class="disclosure">
+        Your plan renews automatically. <b id="terms">$39.99 today, then $89.99 every 90 days</b> until you cancel.
+        Cancel in one click from your account or any receipt — no email required. <a href="#">Subscription Terms</a>.
+      </p>
+      <div class="paymarks">
+        <span class="paymark">[VISA]</span><span class="paymark">[MC]</span>
+        <span class="paymark">[APPLE]</span><span class="paymark">[PAYPAL]</span>
+      </div>
+    </div>
+
+    <div class="twocol section">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h2 class="h2">What you get today</h2>
+        <div class="ticks">
+          <span class="tick"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 17px;margin-top:3px"><path d="M4 12l6 6L20 6"/></svg>Your full plan, sequenced day by day</span>
+          <span class="tick"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 17px;margin-top:3px"><path d="M4 12l6 6L20 6"/></svg>The <span data-merge="issue_1_lower">trust</span> and <span data-merge="issue_2_lower">distance</span> modules you selected</span>
+          <span class="tick"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 17px;margin-top:3px"><path d="M4 12l6 6L20 6"/></svg>The confidence track you asked to include</span>
+          <span class="tick"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2B34F0" stroke-width="2.4" stroke-linecap="square" style="flex:0 0 17px;margin-top:3px"><path d="M4 12l6 6L20 6"/></svg>Sleep and energy reset alongside week 1</span>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h2 class="h2">Before you decide</h2>
+        <div class="faq">
+          <div class="faq__item">
+            <span class="faq__q">What if my situation is different?</span>
+            <span class="faq__a">[Answer in your voice — two lines, aimed at the segment you actually see in the quiz data.]</span>
+          </div>
+          <div class="faq__item">
+            <span class="faq__q">What if she never replies?</span>
+            <span class="faq__a">[Answer honestly. This objection decides the sale — don't promise an outcome you can't control.]</span>
+          </div>
+          <div class="faq__item">
+            <span class="faq__q">How do I cancel?</span>
+            <span class="faq__a">One click in your account, or the link in any receipt. Saying it plainly here lowers refunds and chargebacks more than it costs you.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="stickycta">
+    <button class="btn" type="button" data-checkout>Get my plan</button>
+  </div>
+
+  <footer class="sitefoot">
+    <span>Jamo Health Consulting · 82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States</span>
+    <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
+  </footer>
+
+</div>
+
+<script src="funnel.js"></script>
+<script>
+Funnel.hydrate();
+
+(function () {
+  /* Replace with your real Checkout Champ campaign / product ids. */
+  var TIERS = {
+    '4w':  { intro: 23.99, rebill: '$54.99 every 30 days',  label: '$23.99 today, then $54.99 every 30 days',  cc: '[CC_PRODUCT_4W]' },
+    '12w': { intro: 39.99, rebill: '$89.99 every 90 days',  label: '$39.99 today, then $89.99 every 90 days',  cc: '[CC_PRODUCT_12W]' },
+    '24w': { intro: 74.99, rebill: '$149.00 every 180 days', label: '$74.99 today, then $149.00 every 180 days', cc: '[CC_PRODUCT_24W]' }
+  };
+  var chosen = '12w';
+  var terms = document.getElementById('terms');
+
+  function select(key) {
+    chosen = key;
+    Funnel.answers.set('tier', key);
+    terms.textContent = TIERS[key].label;
+    document.querySelectorAll('[data-tier]').forEach(function (el) {
+      var card = el.closest('.tier');
+      card.style.borderColor = el.getAttribute('data-tier') === key ? 'var(--ink)' : '';
+    });
+  }
+  document.querySelectorAll('[data-tier]').forEach(function (el) {
+    el.addEventListener('click', function () { select(el.getAttribute('data-tier')); });
+  });
+  select(chosen);
+
+  document.getElementById('bump').addEventListener('change', function (e) {
+    Funnel.answers.set('bump', e.target.checked);
+  });
+
+  /* Checkout hand-off. Everything the order needs travels with it:
+     the tier, the bump, the ad params and the quiz answers you want on
+     the order record in Checkout Champ. */
+  document.querySelectorAll('[data-checkout]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var a = Funnel.answers.read();
+      var qs = new URLSearchParams({
+        product: TIERS[chosen].cc,
+        bump: document.getElementById('bump').checked ? '1' : '0',
+        goal: a.goal || '',
+        status: a.status || '',
+        email: a.email || '',
+        first_name: a.first_name || ''
+      });
+      // Point this at your Checkout Champ hosted checkout or embedded form.
+      location.href = Funnel.link('[CHECKOUT_URL]') + '&' + qs.toString();
+    });
+  });
+
+  /* Session countdown. It does not reset on refresh — if it has run out,
+     say so rather than restarting a fake clock. */
+  var KEY = 'bq.deadline';
+  var deadline = Number(sessionStorage.getItem(KEY) || 0);
+  if (!deadline) { deadline = Date.now() + 10 * 60 * 1000; sessionStorage.setItem(KEY, deadline); }
+  var el = document.getElementById('timer');
+  (function tick() {
+    var left = Math.max(0, deadline - Date.now());
+    var m = Math.floor(left / 60000), s = Math.floor(left % 60000 / 1000);
+    el.textContent = left ? m + ':' + String(s).padStart(2, '0') : 'held';
+    if (left) requestAnimationFrame(function () { setTimeout(tick, 500); });
+  })();
+})();
+</script>
+
+</body>
+</html>
