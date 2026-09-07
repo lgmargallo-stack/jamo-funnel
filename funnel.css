@@ -208,6 +208,27 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @media (min-width:900px){
   .step__foot .btn{max-width:420px}
 }
+/* THE COUNTERPART TO THE BUTTON RULE:
+   consent and legal fine print is not a control and does not belong 28px
+   under the last thing you touched — sitting there it reads as part of the
+   action, and on a short screen it strands halfway down an empty page.
+   It is page furniture, so it goes on the bottom edge of the page:
+   margin-top:auto inside the .app flex column, hairline above it, muted. */
+.legalfoot{
+  margin:auto 0 0; padding:18px var(--gutter) calc(20px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--line-2);
+  font-size:11.5px; line-height:1.5; color:var(--mute); text-align:center;
+}
+@media (min-width:900px){
+  .legalfoot{padding-top:20px; padding-bottom:24px; font-size:12.5px}
+}
+/* short screens: the fine print compresses before anything above it does */
+@media (max-height:700px){
+  .legalfoot{padding-top:12px; padding-bottom:14px; font-size:11px}
+}
+.legalfoot a{color:var(--mute); text-decoration:underline; text-underline-offset:2px}
+.legalfoot a:hover{color:var(--ink)}
+
 .foot-note{
   font-family:var(--mono); font-size:9px; letter-spacing:.06em;
   text-transform:uppercase; color:var(--faint); margin:0;
@@ -770,6 +791,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   background:rgba(43,52,240,.06);
 }
 .is-editing{padding-bottom:70px}
+/* the bar takes 70px, so the page is 70px shorter — otherwise every screen
+   gains a scrollbar the moment you open edit mode */
+.is-editing .app{min-height:calc(100dvh - 70px)}
 @media (prefers-reduced-motion:reduce){ .editbar__dot{animation:none} }
 
 /* fade between quiz steps — one transition, nothing more */

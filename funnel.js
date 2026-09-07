@@ -50,6 +50,15 @@
   function saveDraft() {
     try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch (e) {}
   }
+  /* Copy strings may carry markdown-style links: "our [Terms](#) apply".
+     Editors see the raw form and can move or reword them; visitors get real
+     anchors. Everything is escaped first — the copy file is data, not markup. */
+  function linkify(str) {
+    return esc(str).replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (m, label, href) {
+      return '<a href="' + href + '">' + label + '</a>';
+    });
+  }
+  function hasLink(str) { return /\[[^\]]+\]\([^)\s]+\)/.test(str); }
   var store = window.sessionStorage;
 
   // One question = one object. Add, remove or reorder freely: the progress
@@ -140,6 +149,11 @@
   };
 
   var LOADER_PHASES = ['Mapping your situation', 'Scoring her signals', 'Selecting your modules'];
+
+  // The micro-commitment asked mid-loader. Edit mode never runs the loader, so
+  // this and the modal's buttons are registered by hand below to keep them in
+  // copy.js.
+  var COMMITMENT_Q = 'Are you someone who finishes what you start?';
 
   /* -------------------------------------------------------------- store */
 
@@ -233,6 +247,16 @@
   }
   function opt(o) { return typeof o === 'string' ? { value: o, label: o } : o; }
 
+  /* C — emit one editable string.
+     Every visible word in the quiz goes through this, so every visible word
+     shows up in copy.js and can be retyped on the page with ?edit=1. */
+  function C(id, def, tag, attrs) {
+    tag = tag || 'span';
+    return '<' + tag + (attrs ? ' ' + attrs : '') +
+      ' data-copy="' + id + '" data-default="' + esc(def) + '">' +
+      esc(t(id, def)) + '</' + tag + '>';
+  }
+
   /* --------------------------------------------------------------- quiz */
 
   function quiz(opts) {
@@ -257,6 +281,12 @@
     var i = 0;
     var loaderTimer = null;
 
+    /* Screens that never render in edit mode still need their ids in copy.js */
+    t('modal.eyebrow', 'One quick thing');
+    t('modal.question', COMMITMENT_Q);
+    t('modal.no', 'No');
+    t('modal.yes', 'Yes');
+
     function questionNumber(q) { return QUESTIONS.indexOf(q) + 1; }
 
     function railHTML(filled) {
@@ -274,7 +304,9 @@
         '<div class="topbar__side">' +
           (o.back === false ? '' : '<button class="iconbtn" type="button" data-act="back" aria-label="Go back">' + ICON.back + '</button>') +
         '</div>' +
-        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || '[BRAND]') + '</span>' +
+        (o.section
+          ? '<span class="eyebrow topbar__section">' + esc(o.section) + '</span>'
+          : C('brand.wordmark', '[BRAND]', 'span', 'class="wordmark"')) +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -290,16 +322,23 @@
           '<h1 class="h1" style="margin-bottom:10px" data-copy="q:age:title">' + esc(t('q:age:title', q.title)) + '</h1>' +
           '<p class="eyebrow" data-copy="q:age:sub">' + esc(t('q:age:sub', q.sub)) + '</p>' +
         '</div>' +
-        '<div class="panel">' +
-          '<div class="agegrid">' + q.options.map(function (o) {
+        '<div class="panel" style="padding-bottom:28px">' +
+          '<div class="agegrid">' + q.options.map(function (o, idx) {
+            var oid = 'q:age:opt:' + idx;
             return '<button class="agecard" type="button" data-value="' + esc(o.value) + '">' +
               '<span class="agecard__ph">[PHOTO ' + esc(o.label) + ']</span>' +
-              '<span class="agecard__foot"><span class="agecard__label">' + esc(o.label) + '</span>' + ICON.chev + '</span>' +
+              '<span class="agecard__foot">' +
+                C(oid, o.label, 'span', 'class="agecard__label"') + ICON.chev +
+              '</span>' +
             '</button>';
           }).join('') + '</div>' +
-          '<div class="step__foot"><p class="cta-note">By continuing you agree to our <a href="#">Terms</a>, ' +
-            '<a href="#">Privacy Policy</a> and <a href="#">Subscription Terms</a>.</p></div>' +
         '</div>' +
+        /* Page-level fine print, not a control: it belongs at the foot of the
+           page, not 28px under the last thing you touched. .legalfoot takes
+           margin-top:auto so it sits on the bottom edge at any height. */
+        C('age.legal',
+          'By continuing you agree to our [Terms](#), [Privacy Policy](#) and [Subscription Terms](#).',
+          'p', 'class="legalfoot"') +
       '</div>';
     }
 
@@ -326,12 +365,13 @@
       }).join('');
 
       return '<div class="app fade">' +
-        topbar({ section: SECTION_NAMES[q.section], count: String(n).padStart(2, '0') + '/' + qCount }) +
+        topbar({ section: t('section.' + q.section, SECTION_NAMES[q.section]),
+                 count: String(n).padStart(2, '0') + '/' + qCount }) +
         '<div class="quiz__rail">' + railHTML(n) + '</div>' +
         '<div class="step">' +
           '<div class="step__body">' +
             '<div class="step__lede">' +
-              '<span class="eyebrow eyebrow--cold">' + esc(SECTION_NAMES[q.section]) + '</span>' +
+              C('section.' + q.section, SECTION_NAMES[q.section], 'span', 'class="eyebrow eyebrow--cold"') +
               '<h1 class="q-title" data-copy="q:' + q.id + ':title">' + esc(t('q:' + q.id + ':title', q.title)) + '</h1>' +
               (q.sub && !multi ? '<p class="q-sub" data-copy="q:' + q.id + ':sub">' + esc(t('q:' + q.id + ':sub', q.sub)) + '</p>' : '') +
               (multi ? '<p class="eyebrow" data-copy="q:' + q.id + ':sub">' + esc(t('q:' + q.id + ':sub', q.sub || 'Choose all that apply')) + '</p>' : '') +
@@ -342,9 +382,10 @@
             '<div class="options">' + options +
               '<div class="step__foot">' +
                 (multi
-                  ? '<p class="foot-note foot-note--live" data-count>' + picked.length + ' selected</p>' +
-                    '<button class="btn" type="button" data-act="next"' + (picked.length ? '' : ' disabled') + '>Continue</button>'
-                  : '<p class="foot-note">Tap an answer to continue</p>') +
+                  ? '<p class="foot-note foot-note--live" data-count>' +
+                      esc(t('ui.selected', '{n} selected').replace('{n}', picked.length)) + '</p>' +
+                    C('ui.continue', 'Continue', 'button', 'class="btn" type="button" data-act="next"' + (picked.length ? '' : ' disabled'))
+                  : C('ui.tap_hint', 'Tap an answer to continue', 'p', 'class="foot-note"')) +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -356,16 +397,22 @@
       return '<div class="app fade">' +
         topbar({}) +
         '<div class="panel panel--narrow" style="padding-top:26px">' +
-          '<p class="h1" style="color:var(--cold);margin-bottom:6px">[REAL NUMBER]</p>' +
-          '<p class="h2" style="margin-bottom:26px">men have run this plan</p>' +
+          C('i:authority:number', '[REAL NUMBER]', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
+          C('i:authority:number_sub', 'men have run this plan', 'p', 'class="h2" style="margin-bottom:26px"') +
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
-            '<p class="h2" style="font-weight:600">You don\'t need to beg or chase. You need to change what she feels when your name comes up.</p>' +
-            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The [BRAND] team</p>' +
+            C('i:authority:quote',
+              "You don't need to beg or chase. You need to change what she feels when your name comes up.",
+              'p', 'class="h2" style="font-weight:600"') +
+            C('i:authority:attrib', 'The [BRAND] team',
+              'p', 'class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0"') +
           '</div>' +
-          '<p class="q-sub" style="margin-top:22px">Built on published research into attachment and re-connection — ' +
-            '<a href="#">[SOURCE 1]</a>, <a href="#">[SOURCE 2]</a>. Cite what you actually used.</p>' +
-          '<div class="step__foot"><button class="btn" type="button" data-act="next">Continue</button></div>' +
+          C('i:authority:sources',
+            'Built on published research into attachment and re-connection — [SOURCE 1](#), [SOURCE 2](#). Cite what you actually used.',
+            'p', 'class="q-sub" style="margin-top:22px"') +
+          '<div class="step__foot">' +
+            C('i:authority:cta', 'Continue', 'button', 'class="btn" type="button" data-act="next"') +
+          '</div>' +
         '</div>' +
       '</div>';
     }
@@ -380,10 +427,13 @@
         '<div class="' + (dark ? 'split' : '') + '">' +
           '<div class="' + (dark ? 'split__col' : '') + '">' +
             '<div class="panel panel--narrow" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
-              '<span class="eyebrow eyebrow--cold">Worth knowing</span>' +
-              '<h1 class="h1" data-copy="i:' + d.id + ':title">' + esc(t('i:' + d.id + ':title', d.title)) + '</h1>' +
-              '<p class="lede" data-copy="i:' + d.id + ':body">' + esc(fillTemplate(t('i:' + d.id + ':body', d.body))) + '</p>' +
-              '<div class="step__foot"><button class="btn' + (dark ? ' btn--light' : '') + '" type="button" data-act="next">Continue</button></div>' +
+              C('i:' + d.id + ':eyebrow', 'Worth knowing', 'span', 'class="eyebrow eyebrow--cold"') +
+              C('i:' + d.id + ':title', d.title, 'h1', 'class="h1"') +
+              C('i:' + d.id + ':body', d.body, 'p', 'class="lede"') +
+              '<div class="step__foot">' +
+                C('i:' + d.id + ':cta', 'Continue', 'button',
+                  'class="btn' + (dark ? ' btn--light' : '') + '" type="button" data-act="next"') +
+              '</div>' +
             '</div>' +
           '</div>' +
           (dark ? '<div class="split__col split__col--media"><div class="media">[PHOTO — MAN, EARLY MORNING, CALM]</div></div>' : '') +
@@ -395,24 +445,31 @@
       return '<div class="app fade">' +
         topbar({ back: false }) +
         '<div class="panel" style="padding-bottom:30px">' +
-          '<h1 class="h2" style="margin-bottom:6px">Building your plan</h1>' +
-          '<p class="q-sub">Based on your ' + qCount + ' answers</p>' +
+          C('loader.h1', 'Building your plan', 'h1', 'class="h2" style="margin-bottom:6px"') +
+          C('loader.sub', 'Based on your ' + qCount + ' answers', 'p', 'class="q-sub"') +
         '</div>' +
         '<div class="panel"><div class="phases">' + LOADER_PHASES.map(function (name, idx) {
           var segs = '';
           for (var k = 0; k < 12; k++) segs += '<span class="rail__seg"></span>';
           return '<div class="phase is-idle" data-phase="' + idx + '">' +
-            '<div class="phase__head"><span class="phase__name">' + esc(name) + '</span>' +
+            '<div class="phase__head">' +
+              C('loader.phase' + (idx + 1), name, 'span', 'class="phase__name"') +
               '<span class="phase__pct">—</span><span class="phase__check">' + ICON.done + '</span></div>' +
             '<div class="rail__group">' + segs + '</div>' +
           '</div>';
         }).join('') + '</div></div>' +
         '<div class="panel" style="padding-top:40px;padding-bottom:34px">' +
-          '<p class="eyebrow" style="margin-bottom:14px">What men say after week one</p>' +
-          '<div class="reviews">' + [1, 2, 3].map(function () {
+          C('loader.reviews_label', 'What men say after week one', 'p', 'class="eyebrow" style="margin-bottom:14px"') +
+          '<div class="reviews">' + [1, 2, 3].map(function (n) {
             return '<div class="card"><div class="review__head"><span class="review__av">[I]</span>' +
-              '<span><span class="review__name">[REAL NAME]</span><br><span class="review__meta">[VERIFIED · DATE]</span></span></div>' +
-              '<p class="review__body">[Paste a real review. Collect five before launch — do not ship invented ones.]</p></div>';
+              '<span>' +
+                C('review' + n + '.name', '[REAL NAME]', 'span', 'class="review__name"') + '<br>' +
+                C('review' + n + '.meta', '[VERIFIED · DATE]', 'span', 'class="review__meta"') +
+              '</span></div>' +
+              C('review' + n + '.body',
+                '[Paste a real review. Collect five before launch — do not ship invented ones.]',
+                'p', 'class="review__body"') +
+            '</div>';
           }).join('') + '</div>' +
         '</div>' +
       '</div>';
@@ -422,19 +479,24 @@
       return '<div class="app fade">' +
         topbar({}) +
         '<div class="panel panel--centred" style="padding-top:26px">' +
-          '<span class="eyebrow eyebrow--cold">Plan ready</span>' +
-          '<h1 class="h1">Where should we send your plan?</h1>' +
-          '<p class="lede">We\'ll email you a copy so you can come back to it. Your results open on the next screen either way.</p>' +
+          C('email.eyebrow', 'Plan ready', 'span', 'class="eyebrow eyebrow--cold"') +
+          C('email.h1', 'Where should we send your plan?', 'h1', 'class="h1"') +
+          C('email.lede', "We'll email you a copy so you can come back to it. Your results open on the next screen either way.", 'p', 'class="lede"') +
         '</div>' +
         '<div class="panel panel--centred" style="padding-top:26px;gap:18px">' +
           '<label class="field" style="width:100%">' +
-            '<input type="email" name="email" inputmode="email" autocomplete="email" placeholder="you@email.com" required>' +
+            '<input type="email" name="email" inputmode="email" autocomplete="email" placeholder="' +
+              esc(t('email.placeholder', 'you@email.com')) + '" required>' +
           '</label>' +
           '<label class="checkrow"><input type="checkbox" name="optin"><span class="checkrow__box">' + ICON.tick + '</span>' +
-            '<span class="checkrow__text">Also send me weekly tactics and updates. Separate from your plan — skip it and still continue.</span></label>' +
-          '<p class="checkrow__text" style="text-align:left">We don\'t sell your data and one click unsubscribes you. <a href="#">Privacy Policy</a>.</p>' +
-          '<div class="step__foot"><button class="btn" type="button" data-act="email">Send my plan</button>' +
-            '<p class="foot-note">Next: your name and hers</p></div>' +
+            C('email.optin', 'Also send me weekly tactics and updates. Separate from your plan — skip it and still continue.',
+              'span', 'class="checkrow__text"') + '</label>' +
+          C('email.privacy', "We don't sell your data and one click unsubscribes you. [Privacy Policy](#).",
+            'p', 'class="checkrow__text" style="text-align:left"') +
+          '<div class="step__foot">' +
+            C('email.cta', 'Send my plan', 'button', 'class="btn" type="button" data-act="email"') +
+            C('email.foot', 'Next: your name and hers', 'p', 'class="foot-note"') +
+          '</div>' +
         '</div>' +
       '</div>';
     }
@@ -443,17 +505,22 @@
       return '<div class="app fade">' +
         topbar({}) +
         '<div class="panel panel--centred" style="padding-top:26px">' +
-          '<span class="eyebrow eyebrow--cold">Last step</span>' +
-          '<h1 class="h1">Who is this plan for?</h1>' +
-          '<p class="lede">Both names go into your plan so the scripts read like something you\'d actually send.</p>' +
+          C('names.eyebrow', 'Last step', 'span', 'class="eyebrow eyebrow--cold"') +
+          C('names.h1', 'Who is this plan for?', 'h1', 'class="h1"') +
+          C('names.lede', "Both names go into your plan so the scripts read like something you'd actually send.", 'p', 'class="lede"') +
         '</div>' +
         '<div class="panel panel--centred" style="padding-top:26px;gap:16px">' +
-          '<div style="width:100%"><span class="field__label">Your first name</span>' +
-            '<label class="field"><input type="text" name="first_name" autocomplete="given-name" placeholder="Alex" required></label></div>' +
-          '<div style="width:100%"><span class="field__label">Her name</span>' +
-            '<label class="field"><input type="text" name="her_name" placeholder="Type her name" required></label></div>' +
-          '<p class="checkrow__text" style="text-align:left">Names stay on your plan. We never message anyone on your behalf.</p>' +
-          '<div class="step__foot"><button class="btn" type="button" data-act="names">Continue</button></div>' +
+          '<div style="width:100%">' + C('names.label_you', 'Your first name', 'span', 'class="field__label"') +
+            '<label class="field"><input type="text" name="first_name" autocomplete="given-name" placeholder="' +
+              esc(t('names.placeholder_you', 'Alex')) + '" required></label></div>' +
+          '<div style="width:100%">' + C('names.label_her', 'Her name', 'span', 'class="field__label"') +
+            '<label class="field"><input type="text" name="her_name" placeholder="' +
+              esc(t('names.placeholder_her', 'Type her name')) + '" required></label></div>' +
+          C('names.privacy', 'Names stay on your plan. We never message anyone on your behalf.',
+            'p', 'class="checkrow__text" style="text-align:left"') +
+          '<div class="step__foot">' +
+            C('names.cta', 'Continue', 'button', 'class="btn" type="button" data-act="names"') +
+          '</div>' +
         '</div>' +
       '</div>';
     }
@@ -523,7 +590,7 @@
         pct += 100 / (phaseMs / tick);
         if (phase === 1 && pct >= 50 && !asked) {
           asked = true; paused = true;
-          ask('Are you someone who finishes what you start?', function () { paused = false; });
+          ask(COMMITMENT_Q, function () { paused = false; });
         }
         if (pct >= 100) { pct = 0; phase++; }
         if (phase >= LOADER_PHASES.length) { clearInterval(loaderTimer); loaderTimer = null; next(); return; }
@@ -535,12 +602,13 @@
       var wrap = document.createElement('div');
       wrap.className = 'modal';
       wrap.innerHTML = '<div class="modal__card" role="dialog" aria-modal="true">' +
-        '<span class="eyebrow">One quick thing</span>' +
-        '<h2 class="modal__title">' + esc(question) + '</h2>' +
+        C('modal.eyebrow', 'One quick thing', 'span', 'class="eyebrow"') +
+        C('modal.question', question, 'h2', 'class="modal__title"') +
         '<div class="modal__actions">' +
-          '<button class="btn btn--quiet" type="button" data-a="no">No</button>' +
-          '<button class="btn" type="button" data-a="yes">Yes</button>' +
+          C('modal.no', 'No', 'button', 'class="btn btn--quiet" type="button" data-a="no"') +
+          C('modal.yes', 'Yes', 'button', 'class="btn" type="button" data-a="yes"') +
         '</div></div>';
+      applyCopy(wrap);
       wrap.addEventListener('click', function (e) {
         var b = e.target.closest('[data-a]');
         if (!b) return;
@@ -601,7 +669,7 @@
         choice.setAttribute('aria-pressed', at > -1 ? 'false' : 'true');
         var label = mount.querySelector('[data-count]');
         var btn = mount.querySelector('[data-act="next"]');
-        if (label) label.textContent = list.length + ' selected';
+        if (label) label.textContent = t('ui.selected', '{n} selected').replace('{n}', list.length);
         if (btn) btn.disabled = !list.length;
         return;
       }
@@ -616,6 +684,19 @@
       var n = (e.state && typeof e.state.step === 'number') ? e.state.step : 0;
       i = Math.max(0, Math.min(steps.length - 1, n));
       render();
+    });
+
+    /* Render every step once into nothing, so every id the quiz can ever show
+       is registered before anyone clicks Download. Without this, downloading
+       copy.js from screen 2 would only contain screens 1 and 2. */
+    steps.forEach(function (s) {
+      try {
+        if (s.kind === 'question') s.q.kind === 'age' ? renderAge(s.q) : renderQuestion(s.q);
+        else if (s.kind === 'interstitial') s.data.kind === 'authority' ? renderAuthority() : renderBeat(s.data);
+        else if (s.kind === 'loader') renderLoader();
+        else if (s.kind === 'email') renderEmail();
+        else renderNames();
+      } catch (e) {}
     });
 
     /* Every load of the quiz is a fresh start — no half-finished state, no
@@ -647,9 +728,12 @@
       if (def == null) def = el.textContent.trim();
       if (DEFAULTS[id] == null) DEFAULTS[id] = def;
       var raw = draft[id] != null ? draft[id] : (COPY[id] != null ? COPY[id] : def);
-      /* {first_name} and friends stay visible while editing so they can be
-         moved or removed; visitors get them filled in */
-      el.textContent = EDIT ? raw : fillTemplate(raw);
+      /* {first_name} and friends — and [label](href) links — stay visible while
+         editing so they can be moved or removed; visitors get them resolved */
+      if (EDIT) { el.textContent = raw; return; }
+      var filled = fillTemplate(raw);
+      if (hasLink(filled)) el.innerHTML = linkify(filled);
+      else el.textContent = filled;
     });
   }
 
@@ -684,9 +768,17 @@
   }
 
   function copyFile() {
-    var all = {}, keys = Object.keys(DEFAULTS).sort();
+    /* Union of everything known: strings seen on this page, strings already in
+       copy.js from other pages, and anything edited. Downloading from the quiz
+       must never drop the offer page's copy. */
+    var seen = {};
+    [DEFAULTS, COPY, draft].forEach(function (src) {
+      Object.keys(src).forEach(function (k) { seen[k] = 1; });
+    });
+    var all = {}, keys = Object.keys(seen).sort();
     keys.forEach(function (k) {
-      all[k] = draft[k] != null ? draft[k] : (COPY[k] != null ? COPY[k] : DEFAULTS[k]);
+      var v = draft[k] != null ? draft[k] : (COPY[k] != null ? COPY[k] : DEFAULTS[k]);
+      all[k] = v == null ? '' : v;
     });
     var lines = keys.map(function (k) {
       return '  ' + JSON.stringify(k) + ': ' + JSON.stringify(all[k]) + ',';

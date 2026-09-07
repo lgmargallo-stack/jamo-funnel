@@ -16,8 +16,8 @@
 
   <header class="topbar">
     <div class="topbar__side"></div>
-    <span class="wordmark">[BRAND]</span>
-    <div class="topbar__side topbar__side--end"><span class="eyebrow eyebrow--cold">Plan ready</span></div>
+    <span class="wordmark" data-copy="brand.wordmark">[BRAND]</span>
+    <div class="topbar__side topbar__side--end"><span class="eyebrow eyebrow--cold" data-copy="plan.eyebrow">Plan ready</span></div>
   </header>
 
   <div class="page">
@@ -31,15 +31,15 @@
         </div>
 
         <div class="factgrid">
-          <div class="fact"><span class="eyebrow">Status</span><span class="fact__v" data-merge="status">Recently broke up</span></div>
-          <div class="fact"><span class="eyebrow">Goal</span><span class="fact__v" data-merge="goal">Get her back</span></div>
-          <div class="fact"><span class="eyebrow">Time since</span><span class="fact__v" data-merge="time_since">A few weeks</span></div>
+          <div class="fact"><span class="eyebrow" data-copy="plan.fact1_label">Status</span><span class="fact__v" data-merge="status">Recently broke up</span></div>
+          <div class="fact"><span class="eyebrow" data-copy="plan.fact2_label">Goal</span><span class="fact__v" data-merge="goal">Get her back</span></div>
+          <div class="fact"><span class="eyebrow" data-copy="plan.fact3_label">Time since</span><span class="fact__v" data-merge="time_since">A few weeks</span></div>
         </div>
 
         <div class="section">
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px">
             <h2 class="h2" data-copy="plan.meters_h2">Where you are, where this goes</h2>
-            <span class="eyebrow">Now → 30 days</span>
+            <span class="eyebrow" data-copy="plan.meters_range">Now → 30 days</span>
           </div>
 
           <div class="meters" id="meters"></div>
@@ -81,20 +81,20 @@
 
       <aside class="planlayout__side">
         <div class="railcard">
-          <span class="eyebrow">Your plan</span>
-          <span class="h2"><span data-merge="goal">Get her back</span> · 12 weeks</span>
+          <span class="eyebrow" data-copy="plan.rail_eyebrow">Your plan</span>
+          <span class="h2"><span data-merge="goal">Get her back</span> <span data-copy="plan.rail_length">· 12 weeks</span></span>
           <div style="height:1px;background:var(--line-2)"></div>
           <div style="display:flex;flex-direction:column;gap:12px">
-            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">Daily commitment</span><span class="fact__v">10 minutes</span></div>
-            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">Modules selected</span><span class="fact__v" id="moduleCount">6</span></div>
-            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px">First action</span><span class="fact__v">Tonight</span></div>
+            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px" data-copy="plan.rail_row1">Daily commitment</span><span class="fact__v" data-copy="plan.rail_row1v">10 minutes</span></div>
+            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px" data-copy="plan.rail_row2">Modules selected</span><span class="fact__v" id="moduleCount">6</span></div>
+            <div class="fact" style="padding:0;border:0"><span style="color:var(--slate);font-size:15px" data-copy="plan.rail_row3">First action</span><span class="fact__v" data-copy="plan.rail_row3v">Tonight</span></div>
           </div>
           <button class="btn" type="button" data-go="offer.html" data-copy="plan.cta">Get my plan</button>
-          <p class="cta-note">Your <b>64% discount</b> is applied on the next screen.</p>
+          <p class="cta-note" data-copy="plan.cta_note" data-default="Your 64% discount is applied on the next screen.">Your 64% discount is applied on the next screen.</p>
           <div style="height:1px;background:var(--line-2)"></div>
           <div style="display:flex;align-items:center;gap:14px">
             <span class="h2" style="color:var(--cold)">[N]</span>
-            <span class="module__m">men have run this plan. <a href="#">Read what they said</a> — real reviews only.</span>
+            <span class="module__m" data-copy="plan.rail_proof" data-default="men have run this plan. [Read what they said](#) — real reviews only.">men have run this plan. Read what they said — real reviews only.</span>
           </div>
         </div>
       </aside>
@@ -103,13 +103,13 @@
   </div>
 
   <div class="stickycta stickycta--dup">
-    <button class="btn" type="button" data-go="offer.html">Get my plan</button>
-    <p class="cta-note">Your <b>64% discount</b> is applied on the next screen.</p>
+    <button class="btn" type="button" data-go="offer.html" data-copy="plan.cta">Get my plan</button>
+    <p class="cta-note" data-copy="plan.cta_note" data-default="Your 64% discount is applied on the next screen.">Your 64% discount is applied on the next screen.</p>
   </div>
 
   <footer class="sitefoot">
-    <span>[COMPANY] · [ADDRESS]</span>
-    <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
+    <span data-copy="foot.company">[COMPANY] · [ADDRESS]</span>
+    <span data-copy="foot.links" data-default="[Terms](#) · [Privacy](#) · [Subscription Terms](#)">Terms · Privacy · Subscription Terms</span>
   </footer>
 
 </div>
@@ -130,13 +130,13 @@ Funnel.copy.init();
     { name: 'Her interest',  now: 3, plan: 6 },
     { name: 'Your headspace', now: 1, plan: 8 }
   ];
-  document.getElementById('meters').innerHTML = METERS.map(function (m) {
+  document.getElementById('meters').innerHTML = METERS.map(function (m, idx) {
     function row(n, cls) {
       var out = '';
       for (var i = 0; i < 8; i++) out += '<span class="meter__seg' + (i < n ? ' ' + cls : '') + '"></span>';
       return '<div class="meter__row">' + out + '</div>';
     }
-    return '<div class="meter"><div class="meter__head"><span class="meter__name">' + m.name + '</span></div>' +
+    return '<div class="meter"><div class="meter__head"><span class="meter__name" data-copy="plan.meter' + (idx + 1) + '">' + m.name + '</span></div>' +
       row(m.now, 'is-now') + row(m.plan, 'is-plan') + '</div>';
   }).join('');
 
@@ -153,6 +153,10 @@ Funnel.copy.init();
   var slipped = (a.slipped || []).filter(function (s) { return s !== 'none'; });
   if (slipped.length) document.getElementById('vitalityModule').hidden = false;
   document.getElementById('moduleCount').textContent = 4 + (a.issues || []).length;
+
+  /* meters and chips are injected after init, so give the copy layer
+     another pass over the parts that just appeared */
+  Funnel.copy.init();
 
   document.querySelectorAll('[data-go]').forEach(function (b) {
     b.addEventListener('click', function () { Funnel.go(b.getAttribute('data-go')); });

@@ -48,6 +48,10 @@ three pages are the post-quiz flow.
    height cap, never height-led (that made its derived width wider than the
    phone). Height-based media queries compress the stack before anything is
    removed.
+7h. **Consent and legal fine print is page furniture, not a control.** It goes
+   on the bottom edge of the page (`.legalfoot`, `margin-top:auto` inside the
+   `.app` column), never in a `.step__foot` under the action — there it reads
+   as part of the button and strands mid-page on short screens.
 7f. **Selection states need more than a border.** A chosen tier moves border,
    fill, inset ring and marker together, and `:hover` carries a
    `:not(.is-on)` guard so it cannot out-rank selection on source order.
@@ -77,14 +81,23 @@ build-onefile.mjs  regenerates the single-file preview (optional)
 
 ## Copy
 
-Every visible string carries a `data-copy="id"` (or comes from `t(id, default)`
-in the quiz renderers). `copy.js` overrides those ids; the markup default is
-the fallback. `?edit=1` turns the page into an editor and downloads a new
-copy.js. When you add UI, give its strings a `data-copy` id — copy that can
-only be changed in the markup is copy the owner cannot change.
+Every visible string carries a `data-copy="id"`. In markup, write it by hand
+with a `data-default`; in the quiz renderers, emit it with `C(id, default, tag,
+attrs)` — never with a bare string, or the owner cannot change that line.
+`copy.js` overrides the ids; the default is the fallback. `?edit=1` turns the
+page into an editor and downloads a regenerated copy.js.
+
+Two things resolve at render and stay raw while editing: `{merge_tokens}` and
+`[label](href)` links. Use the link syntax rather than putting `<a>` in markup,
+or the copy around the link stops being editable.
+
+`quiz()` renders every step once into nothing at boot purely to register ids,
+and `copyFile()` unions DEFAULTS with the existing COPY, so a download from any
+page is complete. Both matter — do not remove either as dead code.
 
 Prices and rebill terms are deliberately NOT editable copy: they live in
 `TIERS` in offer.html so they cannot drift from what the checkout charges.
+Photo slots (`[PHOTO …]`, `[I]`) are image placeholders, not copy.
 
 ## Placeholders to replace
 

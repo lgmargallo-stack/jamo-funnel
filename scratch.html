@@ -14,7 +14,7 @@
 
 <div class="app">
   <header class="topbar"><div class="topbar__side"></div>
-    <span class="wordmark">[BRAND]</span>
+    <span class="wordmark" data-copy="brand.wordmark">[BRAND]</span>
     <div class="topbar__side topbar__side--end"></div>
   </header>
 
@@ -50,8 +50,8 @@
   </div>
 
   <footer class="sitefoot">
-    <span>[COMPANY] · [ADDRESS]</span>
-    <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
+    <span data-copy="foot.company">[COMPANY] · [ADDRESS]</span>
+    <span data-copy="foot.links" data-default="[Terms](#) · [Privacy](#) · [Subscription Terms](#)">Terms · Privacy · Subscription Terms</span>
   </footer>
 </div>
 
@@ -65,7 +65,7 @@
     <h2 class="modal__title" id="applyTitle" data-copy="scratch.modal_title">Reserving your discount</h2>
     <div class="progress" id="applyBar"><span></span></div>
     <div class="modal__steps">
-      <span class="foot-note" id="applyStep" aria-live="polite">Checking eligibility</span>
+      <span class="foot-note" id="applyStep" aria-live="polite" data-copy="scratch.apply_step1">Checking eligibility</span>
       <span class="foot-note" id="applyPct">0%</span>
     </div>
   </div>
@@ -160,16 +160,22 @@ Funnel.copy.init();
      smoothly, they jump, crawl and hang. A linear bar reads as a countdown;
      this one reads as something being checked. Times are ms from the start,
      pct is where the bar lands, step is the label at that moment. */
+  /* The four labels the stall bar shows. Editable like everything else. */
+  var S1 = Funnel.copy.text('scratch.apply_step1', 'Checking eligibility');
+  var S2 = Funnel.copy.text('scratch.apply_step2', 'Reserving your rate');
+  var S3 = Funnel.copy.text('scratch.apply_step3', 'Locking it in');
+  var S4 = Funnel.copy.text('scratch.apply_step4', 'Ready');
+
   var APPLY_STEPS = [
-    {   t: 0,    pct: 6,   step: 'Checking eligibility' },
-    {   t: 160,  pct: 31,  step: 'Checking eligibility' },
-    {   t: 420,  pct: 38,  step: 'Checking eligibility' },
-    {   t: 700,  pct: 44,  step: 'Reserving your rate'  },
-    {   t: 1150, pct: 47,  step: 'Reserving your rate'  },  // the hang
-    {   t: 1320, pct: 74,  step: 'Reserving your rate'  },
-    {   t: 1600, pct: 81,  step: 'Locking it in'        },
-    {   t: 1820, pct: 92,  step: 'Locking it in'        },
-    {   t: 1960, pct: 100, step: 'Ready'                }
+    {   t: 0,    pct: 6,   step: S1 },
+    {   t: 160,  pct: 31,  step: S1 },
+    {   t: 420,  pct: 38,  step: S1 },
+    {   t: 700,  pct: 44,  step: S2 },
+    {   t: 1150, pct: 47,  step: S2 },  // the hang
+    {   t: 1320, pct: 74,  step: S2 },
+    {   t: 1600, pct: 81,  step: S3 },
+    {   t: 1820, pct: 92,  step: S3 },
+    {   t: 1960, pct: 100, step: S4 }
   ];
   var APPLY_MS = 2000;
 
