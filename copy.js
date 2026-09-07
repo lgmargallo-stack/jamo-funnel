@@ -10,7 +10,7 @@
    offer.html so they cannot drift from what the checkout charges. */
 window.COPY = {
   "age.legal": "By continuing you agree to our [Terms](#), [Privacy Policy](#) and [Subscription Terms](#).",
-  "brand.wordmark": "[BRAND]",
+  "brand.wordmark": "Jamo Dating Protocols",
   "email.cta": "Send my plan",
   "email.eyebrow": "Plan ready",
   "email.foot": "Next: your name and hers",
@@ -19,11 +19,11 @@ window.COPY = {
   "email.optin": "Also send me weekly tactics and updates. Separate from your plan — skip it and still continue.",
   "email.placeholder": "you@email.com",
   "email.privacy": "We don't sell your data and one click unsubscribes you. [Privacy Policy](#).",
-  "foot.company": "[COMPANY] · [ADDRESS]",
+  "foot.company": "Jamo Health Consulting · 82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States",
   "foot.links": "[Terms](#) · [Privacy](#) · [Subscription Terms](#)",
-  "i:authority:attrib": "The [BRAND] team",
+  "i:authority:attrib": "The Jamo Dating Protocols team",
   "i:authority:cta": "Continue",
-  "i:authority:number": "[REAL NUMBER]",
+  "i:authority:number": "51,000+",
   "i:authority:number_sub": "men have run this plan",
   "i:authority:quote": "You don't need to beg or chase. You need to change what she feels when your name comes up.",
   "i:authority:sources": "Built on published research into attachment and re-connection — [SOURCE 1](#), [SOURCE 2](#). Cite what you actually used.",

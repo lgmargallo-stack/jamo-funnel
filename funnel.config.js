@@ -18,9 +18,9 @@ window.FUNNEL_CONFIG = {
 
   /* ---------------------------------------------------------------- brand */
   brand: {
-    name: '[BRAND]',
-    company: '[COMPANY]',
-    address: '[ADDRESS]',
+    name: 'Jamo Dating Protocols',
+    company: 'Jamo Health Consulting',
+    address: '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States',
     /* Google Fonts URL. Swap the families and the theme below together —
        a new typeface with the old spacing rarely lands. */
     fonts: 'https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@600;700;800&family=Instrument+Sans:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap',

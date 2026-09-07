@@ -1,5 +1,5 @@
 /* ==========================================================================
-   [BRAND] funnel — shared runtime.
+   Jamo Dating Protocols funnel — shared runtime.
 
    Loaded by every page. Exposes:
      Funnel.answers      read/write the quiz answer store (localStorage)
@@ -55,8 +55,8 @@
   /* Registered before any page renders, so markup placeholders like [BRAND]
      and [COMPANY] resolve to this offer's names without being edited. */
   function seedBrandCopy() {
-    t('brand.wordmark', cfg('brand.name', '[BRAND]'));
-    t('foot.company', cfg('brand.company', '[COMPANY]') + ' · ' + cfg('brand.address', '[ADDRESS]'));
+    t('brand.wordmark', cfg('brand.name', 'Jamo Dating Protocols'));
+    t('foot.company', cfg('brand.company', 'Jamo Health Consulting') + ' · ' + cfg('brand.address', '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States'));
   }
 
   /* ---------------------------------------------------------------- data */
@@ -306,9 +306,9 @@
       outcome_2: outcomes[1] || d.outcome_2 || '',
       promo_code: promoCode(a.first_name),
       discount: String(cfg('flow.discountPct', 64)),
-      brand: cfg('brand.name', '[BRAND]'),
-      company: cfg('brand.company', '[COMPANY]'),
-      address: cfg('brand.address', '[ADDRESS]')
+      brand: cfg('brand.name', 'Jamo Dating Protocols'),
+      company: cfg('brand.company', 'Jamo Health Consulting'),
+      address: cfg('brand.address', '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States')
     };
   }
   function hydrate(root) {
@@ -410,7 +410,7 @@
         '</div>' +
         (o.section
           ? '<span class="eyebrow topbar__section">' + esc(o.section) + '</span>'
-          : C('brand.wordmark', cfg('brand.name', '[BRAND]'), 'span', 'class="wordmark"')) +
+          : C('brand.wordmark', cfg('brand.name', 'Jamo Dating Protocols'), 'span', 'class="wordmark"')) +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -501,14 +501,14 @@
       return '<div class="app fade">' +
         topbar({}) +
         '<div class="panel panel--narrow" style="padding-top:26px">' +
-          C('i:authority:number', '[REAL NUMBER]', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
+          C('i:authority:number', '51,000+', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
           C('i:authority:number_sub', 'men have run this plan', 'p', 'class="h2" style="margin-bottom:26px"') +
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
             C('i:authority:quote',
               "You don't need to beg or chase. You need to change what she feels when your name comes up.",
               'p', 'class="h2" style="font-weight:600"') +
-            C('i:authority:attrib', 'The [BRAND] team',
+            C('i:authority:attrib', 'The Jamo Dating Protocols team',
               'p', 'class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0"') +
           '</div>' +
           C('i:authority:sources',
