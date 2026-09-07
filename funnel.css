@@ -787,6 +787,27 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .editbar__btn--quiet{background:transparent; color:#8A93A0; box-shadow:inset 0 0 0 1px #2E333B}
 .editbar__btn--quiet:hover{background:#22262D; color:#fff}
 
+/* ---------------------------------------------------------- image slots --
+   A slot is a frame that holds either a placeholder label or a photo. Filled
+   or empty, it keeps the same box, so swapping a picture in never moves the
+   layout around it. */
+.phslot{overflow:hidden; position:relative}
+.phslot.is-filled{padding:0}
+.phslot img{width:100%; height:100%; object-fit:cover; display:block}
+.is-editing .is-swappable{cursor:pointer}
+.is-editing .is-swappable:hover{outline:2px solid var(--cold); outline-offset:-2px}
+.is-editing .is-swappable::after{
+  content:'Click to swap'; position:absolute; left:8px; bottom:8px; z-index:2;
+  font-family:var(--mono); font-size:9px; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--ink); color:#fff; padding:5px 7px; opacity:0; transition:opacity .12s ease;
+}
+.is-editing .is-swappable:hover::after{opacity:1}
+.editbar__files{
+  font-family:var(--mono); font-size:9px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--warm); max-width:320px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+
 .is-editing [data-copy]{cursor:text}
 .is-editing .is-editable{
   outline:1px dashed rgba(43,52,240,.4); outline-offset:3px; border-radius:1px;

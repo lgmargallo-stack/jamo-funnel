@@ -261,6 +261,16 @@
   }
   function opt(o) { return typeof o === 'string' ? { value: o, label: o } : o; }
 
+  /* IMG — emit one swappable image slot.
+     The value is just a path string, so it rides the same copy.js the words
+     do: nothing new to deploy, and ?edit=1 can set it. Empty value = show the
+     grey placeholder, which is what keeps an unfilled slot obvious. */
+  function IMG(id, wrapClass, placeholder, attrs) {
+    t(id, '');                       // register it, so it reaches copy.js
+    return '<span class="' + wrapClass + ' phslot"' + (attrs ? ' ' + attrs : '') +
+      ' data-img="' + id + '" data-ph="' + esc(placeholder) + '" data-default=""></span>';
+  }
+
   /* C — emit one editable string.
      Every visible word in the quiz goes through this, so every visible word
      shows up in copy.js and can be retyped on the page with ?edit=1. */
@@ -340,7 +350,7 @@
           '<div class="agegrid">' + q.options.map(function (o, idx) {
             var oid = 'q:age:opt:' + idx;
             return '<button class="agecard" type="button" data-value="' + esc(o.value) + '">' +
-              '<span class="agecard__ph">[PHOTO ' + esc(o.label) + ']</span>' +
+              IMG('img.age' + idx, 'agecard__ph', '[PHOTO ' + o.label + ']') +
               '<span class="agecard__foot">' +
                 C(oid, o.label, 'span', 'class="agecard__label"') + ICON.chev +
               '</span>' +
@@ -450,7 +460,9 @@
               '</div>' +
             '</div>' +
           '</div>' +
-          (dark ? '<div class="split__col split__col--media"><div class="media">[PHOTO — MAN, EARLY MORNING, CALM]</div></div>' : '') +
+          (dark ? '<div class="split__col split__col--media">' +
+                    IMG('img.insight', 'media', '[PHOTO — MAN, EARLY MORNING, CALM]') +
+                  '</div>' : '') +
         '</div>' +
       '</div>';
     }
@@ -749,9 +761,75 @@
       if (hasLink(filled)) el.innerHTML = linkify(filled);
       else el.textContent = filled;
     });
+
+    /* Image slots: a path fills the frame, an empty value shows the label.
+       previewSrc is a blob URL held only for the tab you picked the file in,
+       so edit mode can show the picture before the file is in the repo. */
+    (root || document).querySelectorAll('[data-img]').forEach(function (el) {
+      var id = el.getAttribute('data-img');
+      if (DEFAULTS[id] == null) DEFAULTS[id] = el.getAttribute('data-default') || '';
+      var path = draft[id] != null ? draft[id] : (COPY[id] != null ? COPY[id] : DEFAULTS[id]);
+      var src = previewSrc[id] || path;
+      if (src) {
+        el.classList.add('is-filled');
+        el.innerHTML = '<img src="' + esc(src) + '" alt="" loading="lazy">';
+      } else {
+        el.classList.remove('is-filled');
+        el.textContent = el.getAttribute('data-ph') || '';
+      }
+      if (EDIT) el.setAttribute('title', path ? path : 'Click to choose an image');
+    });
+  }
+
+  /* blob previews, this tab only — never written to the draft or to copy.js */
+  var previewSrc = {};
+
+  function pickImage(el) {
+    var id = el.getAttribute('data-img');
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.cssText = 'position:fixed;left:-9999px';
+    document.body.appendChild(input);
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0];
+      input.remove();
+      if (!f) return;
+      /* The site is static: we can't write the file into the repo from here.
+         So we record the path it will have and preview the local file, and
+         the bar tells you which file to drop into images/. */
+      var name = f.name.replace(/[^A-Za-z0-9._-]/g, '-');
+      draft[id] = 'images/' + name;
+      saveDraft();
+      previewSrc[id] = URL.createObjectURL(f);
+      applyCopy();
+      pending[name] = true;
+      updateBar();
+    });
+    input.click();
+  }
+  var pending = {};
+
+  function updateBar() {
+    var c = document.getElementById('editCount');
+    if (c) c.textContent = Object.keys(draft).length;
+    var n = document.getElementById('editFiles');
+    if (!n) return;
+    var files = Object.keys(pending);
+    n.textContent = files.length ? 'Copy into images/: ' + files.join(', ') : '';
+    n.hidden = !files.length;
   }
 
   function enableEditing(root) {
+    (root || document).querySelectorAll('[data-img]').forEach(function (el) {
+      if (el.dataset.imgReady) return;
+      el.dataset.imgReady = '1';
+      el.classList.add('is-swappable');
+      el.addEventListener('click', function (e) {
+        e.preventDefault(); e.stopPropagation();
+        pickImage(el);
+      });
+    });
     (root || document).querySelectorAll('[data-copy]').forEach(function (el) {
       if (el.dataset.editReady) return;
       el.dataset.editReady = '1';
@@ -761,8 +839,7 @@
       el.addEventListener('input', function () {
         draft[el.getAttribute('data-copy')] = el.innerText.replace(/\s+$/, '');
         saveDraft();
-        var b = document.getElementById('editCount');
-        if (b) b.textContent = Object.keys(draft).length;
+        updateBar();
       });
       el.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); el.blur(); }
@@ -830,6 +907,7 @@
     bar.innerHTML =
       '<span class="editbar__dot"></span>' +
       '<span class="editbar__label">Editing copy · <b id="editCount">' + Object.keys(draft).length + '</b> changed</span>' +
+      '<span class="editbar__files" id="editFiles" hidden></span>' +
       (nav ? '<span class="editbar__nav">' +
         '<button type="button" data-ed="prev" aria-label="Previous screen">‹</button>' +
         '<span id="editStep">' + nav.label + '</span>' +
@@ -853,8 +931,8 @@
           setTimeout(function () { b.textContent = was; }, ok ? 2600 : 4000);
         });
       }
-      if (a === 'reset' && confirm('Discard all copy edits made in this browser?')) {
-        draft = {}; saveDraft(); location.reload();
+      if (a === 'reset' && confirm('Discard all copy and image edits made in this browser?')) {
+        draft = {}; previewSrc = {}; pending = {}; saveDraft(); location.reload();
       }
       if (a === 'prev' && nav) nav.prev();
       if (a === 'next' && nav) nav.next();

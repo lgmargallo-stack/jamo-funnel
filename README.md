@@ -11,6 +11,7 @@ offer.html     tiers, bump, checkout hand-off
 funnel.css     every screen, mobile-first, one breakpoint at 900px
 funnel.js      quiz engine, answer store, merge fields, param passthrough
 copy.js        every visible string on the site, by id
+images/        your photos — the age cards and the dark interstitial
 bump.mjs       stamps ?v= on the assets so pushes aren't cached
 ```
 
@@ -92,6 +93,33 @@ Two things stay visible while editing and resolve for visitors:
 - **Links** — `our [Terms](#) apply` — write the label in brackets and the URL
   in parentheses, and it renders as a link. That is how you point the legal
   line and the footer at your real pages.
+
+## Photos
+
+Five slots take images: the four age-gate cards and the dark interstitial.
+Empty, each shows a grey `[PHOTO …]` frame, which is how you can tell at a
+glance what is still unfilled.
+
+To fill one, in `?edit=1` click the frame and choose a file. Three things
+happen: the page previews your file immediately, it records the path
+`images/<filename>`, and the edit bar lists the filename under "Copy into
+images/". Then:
+
+1. Put that same file in the `images/` folder.
+2. **Copy copy.js** → paste into `copy.js` → save.
+3. `node bump.mjs`, commit, push.
+
+The preview is local to your browser, so the picture only becomes real for
+everyone else once the file is in `images/` and pushed. If a path is set but
+the file is missing you get an empty frame — that is the symptom of skipping
+step 1.
+
+Keep filenames lowercase with hyphens and no spaces. The age cards render
+236px tall on desktop (~800×600 is plenty); the interstitial runs full height
+beside the copy (~1200×1600 portrait). Compress before committing.
+
+Not slots: the review monograms are initials by design, and `[N]` /
+`[REAL NUMBER]` are text.
 
 **Discard** clears your local edits and reloads. Nothing about edit mode is
 visible to visitors — no bar, no outlines, no editable text.

@@ -113,6 +113,16 @@ Prices and rebill terms are deliberately NOT editable copy: they live in
 `TIERS` in offer.html so they cannot drift from what the checkout charges.
 Photo slots (`[PHOTO …]`, `[I]`) are image placeholders, not copy.
 
+## Images
+
+Five image slots — four age cards, one interstitial — emitted by `IMG(id,
+class, placeholder)` in funnel.js. The value is a path string living in the
+same copy.js as the words, so there is no second data file and `?edit=1` can
+set it with a file picker. Empty value renders the `[PHOTO …]` label; a path
+renders `<img>` inside the same box, so the layout never shifts when a photo
+lands. Files go in `images/`. Do not switch these to CSS background images —
+the slot has to be able to show a label when it is empty.
+
 ## Placeholders to replace
 
 `[BRAND]` `[COMPANY]` `[ADDRESS]` `[REAL NUMBER]` `[N]` `[SOURCE 1]`
