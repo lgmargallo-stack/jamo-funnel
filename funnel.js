@@ -1,5 +1,5 @@
 /* ==========================================================================
-   [BRAND] funnel — shared runtime.
+   Jamo Dating Protocols funnel — shared runtime.
 
    Loaded by every page. Exposes:
      Funnel.answers      read/write the quiz answer store (localStorage)
@@ -252,7 +252,7 @@
         '<div class="topbar__side">' +
           (o.back === false ? '' : '<button class="iconbtn" type="button" data-act="back" aria-label="Go back">' + ICON.back + '</button>') +
         '</div>' +
-        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || '[BRAND]') + '</span>' +
+        '<span class="' + (o.section ? 'eyebrow topbar__section' : 'wordmark') + '">' + esc(o.section || 'Jamo Dating Protocols') + '</span>' +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -335,7 +335,7 @@
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
             '<p class="h2" style="font-weight:600">You don\'t need to beg or chase. You need to change what she feels when your name comes up.</p>' +
-            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The [BRAND] team</p>' +
+            '<p class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0">The Jamo Dating Protocols team</p>' +
           '</div>' +
           '<p class="q-sub" style="margin-top:22px">Built on published research into attachment and re-connection — ' +
             '<a href="#">[SOURCE 1]</a>, <a href="#">[SOURCE 2]</a>. Cite what you actually used.</p>' +
