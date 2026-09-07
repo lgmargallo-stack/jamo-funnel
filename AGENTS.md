@@ -36,9 +36,11 @@ engine still runs if the config is missing.
 3. **The quiz never navigates.** Every question renders into `#quiz` in
    `index.html`. The only `location.href` in the quiz is the final redirect to
    `scratch.html`. Do not turn steps into routes or separate pages.
-4. **Nothing branches on answers.** Every path ends on the same `plan.html` and
-   the same `offer.html`. Answers are display values (merge fields), not
-   routing rules. Do not add conditional funnels.
+4. **Answers change words, never destinations.** Every path ends on the same
+   `plan.html` and the same `offer.html`. Answers feed merge fields and the
+   `variants` block in the config — both of which decide what a line SAYS.
+   They never decide where anyone goes. Do not add conditional funnels, and
+   do not let a segment skip, add or reorder a step.
 5. **Questions live in the `QUESTIONS` array** in `funnel.js`. Add, remove or
    reorder there — never hard-code a question into markup. The progress rail,
    the step counter and the resume logic all derive from that array.
@@ -151,6 +153,13 @@ or the copy around the link stops being editable.
 `quiz()` renders every step once into nothing at boot purely to register ids,
 and `copyFile()` unions DEFAULTS with the existing COPY, so a download from any
 page is complete. Both matter — do not remove either as dead code.
+
+Copy that changes per visitor goes in `variants` in the config, keyed on
+answers (status + goal today). Each entry becomes its own copy id —
+`offer.faq1_a#moveon` — so every segment is separately editable in `?edit=1`,
+and `copyFile()` ships all segments, not just the one you were viewing.
+`?as=<segment>` previews one without taking the quiz. When you add a variant,
+give every segment a value or make sure `default` covers it.
 
 Prices and rebill terms are deliberately NOT editable copy: they live in
 `TIERS` in offer.html so they cannot drift from what the checkout charges.

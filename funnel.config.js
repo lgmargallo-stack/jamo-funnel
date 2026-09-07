@@ -171,6 +171,110 @@ window.FUNNEL_CONFIG = {
       body: "Trust and emotional distance aren't personality flaws — they're patterns, and patterns respond to a sequence. Your plan starts with the two you picked." }
   },
 
+  /* -------------------------------------------------------------- variants
+     Copy that changes with the answers. `key` names the answers that decide
+     the segment; `segments` maps "answer | answer" patterns to a segment name
+     (first match wins, so specific rows go above general ones, and `*` is a
+     wildcard); `copy` gives each segment its text for chosen copy ids.
+
+     WORDS ONLY. Every visitor still walks the same steps and lands on the
+     same offer — a segment decides what a paragraph says, never where anyone
+     goes. See constraint 4 in AGENTS.md.
+
+     Each entry becomes a real copy id (offer.faq1_a#reconcile_fresh), so all
+     of them are editable in ?edit=1 and all ship in copy.js. Preview one with
+     ?as=reconcile_fresh without taking the quiz.
+
+     Anything with no entry for the matched segment falls back to `default`,
+     and anything not listed here at all is the same for everyone. */
+  variants: {
+    key: ['status', 'goal'],
+    fallback: 'default',
+
+    segments: {
+      'Recently broke up | Get her back':            'reconcile_fresh',
+      '* | Get her back':                            'reconcile',
+      '* | Make her miss me':                        'distance',
+      'In a relationship | Rekindle the spark':      'together',
+      'Married | Rekindle the spark':                'together',
+      '* | Rekindle the spark':                      'rekindle',
+      "It's complicated | *":                        'ambiguous',
+      '* | Move on with confidence':                 'moveon',
+      '* | *':                                       'default'
+    },
+
+    copy: {
+      /* He is days or weeks out and wants her back. The largest segment, and
+         the one most likely to act on urgency — so the answers deliberately
+         slow him down rather than promise a reply. */
+      reconcile_fresh: {
+        'offer.faq1_q': "It only just ended — is it too early to start?",
+        'offer.faq1_a': "The opposite. The first two weeks are the ones most men spend making it worse, because it is when the urge to explain yourself is strongest. The plan opens with what to do while it is still raw.",
+        'offer.faq2_q': "What if she doesn't reply?",
+        'offer.faq2_a': "Then you find that out in week one instead of month three. Nothing in the early work depends on her replying — it is the part that decides whether a reply, if it comes, goes anywhere."
+      },
+
+      /* Wants her back, but it has been a while or the status is murkier. */
+      reconcile: {
+        'offer.faq1_q': "My situation is messier than the quiz allowed for.",
+        'offer.faq1_a': "Most are. The sequence does not assume a clean break — it assumes you have limited contact and limited credit with her, and it starts by rebuilding both.",
+        'offer.faq2_q': "What if she never replies?",
+        'offer.faq2_a': "That is possible, and nobody can promise you otherwise. What this stops is another three months of messages that make a reply less likely, and it gives you work that is worth doing either way."
+      },
+
+      /* Wants distance to do the work. The risk here is he hears "go quiet
+         and wait", which is the version that fails. */
+      distance: {
+        'offer.faq1_q': "Isn't this just going quiet on her?",
+        'offer.faq1_a': "No — silence on its own reads as sulking, and she has seen that before. What matters is what you do with the time and what she sees when she looks. Most of the plan is the second part.",
+        'offer.faq2_q': "How long before she notices?",
+        'offer.faq2_a': "Unknowable, honestly — that depends on her. What is in your control is being worth noticing when she does look, and that starts in week one."
+      },
+
+      /* Still together. Easier ground, and the objection is different: he is
+         worried this is breakup tactics aimed at someone he lives with. */
+      together: {
+        'offer.faq1_q': "We're still together — is this for us?",
+        'offer.faq1_a': "Yes, and it is easier from here than after a breakup. Nothing asks you to manufacture distance or play games with someone you share a life with — it works on what changed in the day to day, because that is usually where it went.",
+        'offer.faq2_q': "Do I have to tell her I'm doing this?",
+        'offer.faq2_a': "Your call. Nothing in the plan needs a conversation about the plan. Most of week one is things she will notice without being told, which is generally the better order."
+      },
+
+      /* Wants the spark back, but not currently in the relationship. */
+      rekindle: {
+        'offer.faq1_q': "Can you get it back once it's gone flat?",
+        'offer.faq1_a': "Often, yes — flat is usually a pattern rather than a verdict, and patterns respond to a sequence. What nobody can tell you is whether she wants the same thing, and the plan is honest about testing that early.",
+        'offer.faq2_q': "What if she's already checked out?",
+        'offer.faq2_a': "Then you will see it sooner rather than after another six months of hoping. That is not the answer you want, but knowing it early is worth more than a plan that pretends otherwise."
+      },
+
+      /* "It's complicated" — the defining feature is that the rules keep
+         moving, so the copy addresses that rather than any one outcome. */
+      ambiguous: {
+        'offer.faq1_q': "My situation doesn't really fit a category.",
+        'offer.faq1_a': "Complicated usually means the rules keep changing and you are the one adapting. The plan starts by making your side predictable, because that is the only half you control.",
+        'offer.faq2_q': "What if it never resolves either way?",
+        'offer.faq2_a': "Then at least you stop living in the gap. Deciding gets much easier once you are sleeping and not checking her profile — that is what the first two weeks are for."
+      },
+
+      /* He said move on. Do not sell him a reconciliation plan. */
+      moveon: {
+        'offer.faq1_q': "Will this try to talk me into getting her back?",
+        'offer.faq1_a': "No. You said move on, so the plan moves on — no reopening scripts, no strategy for making her miss you. It is about getting your sleep, your attention and your weeks back.",
+        'offer.faq2_q': "What if I change my mind?",
+        'offer.faq2_a': "You might, and that is allowed. The early work is the same either way, and you will be in a far better position to make that call in six weeks than you are tonight."
+      },
+
+      /* Anyone the rows above did not catch. */
+      default: {
+        'offer.faq1_q': "What if my situation is different?",
+        'offer.faq1_a': "In the details it will be. The sequence is not built on one story — it is built on the order things have to happen in, and that order holds across most of them.",
+        'offer.faq2_q': "What if it doesn't work?",
+        'offer.faq2_a': "It might not. Anything involving another person cannot be promised, and you should be suspicious of anyone who does. What is in your control is doing the right things in the right order rather than too early, which is where most of this goes wrong."
+      }
+    }
+  },
+
   /* ---------------------------------------------------------------- merges
      What {first_name}, {goal} and friends fall back to when someone reaches
      a page without having taken the quiz. Write them in this offer's own

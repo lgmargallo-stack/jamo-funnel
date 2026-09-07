@@ -70,8 +70,9 @@ Answers live in `sessionStorage` under `bq.answers.v1`. Any element with
 `first_name` `her_name` `status` `goal` `goal_lower` `time_since`
 `hardest_part` `issue_1` `issue_2` `outcome_1` `outcome_2` `promo_code`
 
-Nothing branches. Every path lands on the same lead page and the same offer —
-the merge fields are the only thing that differs between visitors.
+Answers change words, never destinations. Every path lands on the same lead
+page and the same offer; merge fields and segment variants are the only
+things that differ between visitors.
 
 ## Editing copy without touching code
 
@@ -100,7 +101,7 @@ the markup become fallbacks.
 Then `node bump.mjs`, commit, push — and click **Discard** on the live page so
 your local draft stops masking what actually deployed.
 
-`copy.js` ships complete: all 223 ids are already in it, from every page. So a
+`copy.js` ships complete: all 251 ids are already in it, from every page. So a
 download taken while editing the quiz still carries the offer page's copy, and
 you can equally edit the file directly in Cursor instead of on the page.
 
@@ -113,6 +114,39 @@ Two things stay visible while editing and resolve for visitors:
 - **Links** — `our [Terms](#) apply` — write the label in brackets and the URL
   in parentheses, and it renders as a link. That is how you point the legal
   line and the footer at your real pages.
+
+## Copy that changes with the answers
+
+The offer page's first two FAQs are written per segment, because "what if she
+never replies" is not the objection a man who chose *move on with confidence*
+has. Segments come from **status + goal** and live in `variants` in
+`funnel.config.js`:
+
+| status | goal | segment |
+|---|---|---|
+| Recently broke up | Get her back | `reconcile_fresh` |
+| any | Get her back | `reconcile` |
+| any | Make her miss me | `distance` |
+| In a relationship / Married | Rekindle the spark | `together` |
+| any | Rekindle the spark | `rekindle` |
+| It's complicated | any | `ambiguous` |
+| any | Move on with confidence | `moveon` |
+| anything else, or no quiz taken | | `default` |
+
+First match wins, so specific rows sit above general ones and `*` is a
+wildcard.
+
+Each variant is its own copy id — `offer.faq1_a#moveon` — so every segment is
+separately editable in `?edit=1`, and Copy copy.js carries all of them, not
+just the one you were looking at. Preview a segment without taking the quiz
+with `?as=moveon`.
+
+To vary another line, add its id under each segment in `variants.copy`. Third
+FAQ (cancellation) is deliberately the same for everyone — it is a fact, not a
+pitch.
+
+This varies words only. Every visitor still walks the same steps and lands on
+the same offer.
 
 ## Photos
 

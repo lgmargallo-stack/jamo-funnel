@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Jamo Dating Protocols funnel — shared runtime.
+   [BRAND] funnel — shared runtime.
 
    Loaded by every page. Exposes:
      Funnel.answers      read/write the quiz answer store (localStorage)
@@ -55,8 +55,8 @@
   /* Registered before any page renders, so markup placeholders like [BRAND]
      and [COMPANY] resolve to this offer's names without being edited. */
   function seedBrandCopy() {
-    t('brand.wordmark', cfg('brand.name', 'Jamo Dating Protocols'));
-    t('foot.company', cfg('brand.company', 'Jamo Health Consulting') + ' · ' + cfg('brand.address', '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States'));
+    t('brand.wordmark', cfg('brand.name', '[BRAND]'));
+    t('foot.company', cfg('brand.company', '[COMPANY]') + ' · ' + cfg('brand.address', '[ADDRESS]'));
   }
 
   /* ---------------------------------------------------------------- data */
@@ -306,9 +306,9 @@
       outcome_2: outcomes[1] || d.outcome_2 || '',
       promo_code: promoCode(a.first_name),
       discount: String(cfg('flow.discountPct', 64)),
-      brand: cfg('brand.name', 'Jamo Dating Protocols'),
-      company: cfg('brand.company', 'Jamo Health Consulting'),
-      address: cfg('brand.address', '82 Wendell Ave., Ste 100, Pittsfield, MA 01201, United States')
+      brand: cfg('brand.name', '[BRAND]'),
+      company: cfg('brand.company', '[COMPANY]'),
+      address: cfg('brand.address', '[ADDRESS]')
     };
   }
   function hydrate(root) {
@@ -321,6 +321,66 @@
   function fillTemplate(str) {
     var v = mergeValues();
     return String(str).replace(/\{(\w+)\}/g, function (m, k) { return v[k] != null ? v[k] : m; });
+  }
+
+  /* ----------------------------------------------------------- variants
+     Some lines land better when they answer the objection this particular
+     visitor actually has. `variants` in the config maps a combination of
+     answers (status + goal, by default) to a segment name, and gives each
+     segment its own text for chosen copy ids.
+
+     This varies WORDS ONLY. Every visitor still walks the same steps and
+     lands on the same offer — see constraint 4 in AGENTS.md. A segment
+     decides what a paragraph says, never where anyone goes.
+
+     Each variant is a real copy id (`offer.faq1_a#reconcile_fresh`), so all
+     of them are editable in ?edit=1 and all of them ship in copy.js.
+     Add ?as=<segment> to preview one without taking the quiz. */
+
+  var SEG = null;
+  function currentSeg() {
+    if (SEG !== null) return SEG;
+    var forced = new URLSearchParams(location.search).get('as');
+    if (forced) return (SEG = forced);
+    var keys = cfg('variants.key', null);
+    var fallback = cfg('variants.fallback', 'default');
+    if (!keys || !keys.length) return (SEG = fallback);
+    var a = read();
+    var vals = keys.map(function (k) { return a[k] || ''; });
+    var segs = cfg('variants.segments', {});
+    var names = Object.keys(segs);          // first match wins — order them
+    for (var i = 0; i < names.length; i++) {   // specific before general
+      var pat = names[i].split('|').map(function (x) { return x.trim(); });
+      var ok = true;
+      for (var j = 0; j < vals.length; j++) {
+        var want = pat[j] == null ? '*' : pat[j];
+        if (want !== '*' && want !== vals[j]) { ok = false; break; }
+      }
+      if (ok) return (SEG = segs[names[i]]);
+    }
+    return (SEG = fallback);
+  }
+
+  /* id -> the variant id and seed text for this visitor's segment, or null
+     when this id has no variants (the overwhelming majority of them). */
+  function variantFor(id) {
+    var byseg = cfg('variants.copy', null);
+    if (!byseg) return null;
+    var seg = currentSeg();
+    if (byseg[seg] && byseg[seg][id] != null) return { id: id + '#' + seg, def: byseg[seg][id] };
+    var fb = cfg('variants.fallback', 'default');
+    if (byseg[fb] && byseg[fb][id] != null) return { id: id + '#' + fb, def: byseg[fb][id] };
+    return null;
+  }
+
+  /* Every variant of every segment goes into copy.js, not just the one this
+     visitor sees — otherwise a download taken as one segment would drop the
+     other segments' words. */
+  function registerVariants() {
+    var byseg = cfg('variants.copy', {});
+    Object.keys(byseg).forEach(function (seg) {
+      Object.keys(byseg[seg]).forEach(function (id) { t(id + '#' + seg, byseg[seg][id]); });
+    });
   }
 
   /* -------------------------------------------------------------- icons */
@@ -410,7 +470,7 @@
         '</div>' +
         (o.section
           ? '<span class="eyebrow topbar__section">' + esc(o.section) + '</span>'
-          : C('brand.wordmark', cfg('brand.name', 'Jamo Dating Protocols'), 'span', 'class="wordmark"')) +
+          : C('brand.wordmark', cfg('brand.name', '[BRAND]'), 'span', 'class="wordmark"')) +
         '<div class="topbar__side topbar__side--end">' +
           (o.count ? '<span class="eyebrow">' + o.count + '</span>' : '') +
         '</div>' +
@@ -501,14 +561,14 @@
       return '<div class="app fade">' +
         topbar({}) +
         '<div class="panel panel--narrow" style="padding-top:26px">' +
-          C('i:authority:number', '51,000+', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
+          C('i:authority:number', '[REAL NUMBER]', 'p', 'class="h1" style="color:var(--cold);margin-bottom:6px"') +
           C('i:authority:number_sub', 'men have run this plan', 'p', 'class="h2" style="margin-bottom:26px"') +
           '<div class="card card--shade" style="display:flex;flex-direction:column;gap:16px">' +
             ICON.quote +
             C('i:authority:quote',
               "You don't need to beg or chase. You need to change what she feels when your name comes up.",
               'p', 'class="h2" style="font-weight:600"') +
-            C('i:authority:attrib', 'The Jamo Dating Protocols team',
+            C('i:authority:attrib', 'The [BRAND] team',
               'p', 'class="q-sub" style="border-top:1px solid var(--line);padding-top:14px;margin:0"') +
           '</div>' +
           C('i:authority:sources',
@@ -835,13 +895,16 @@
   function applyCopy(root) {
     (root || document).querySelectorAll('[data-copy]').forEach(function (el) {
       var id = el.getAttribute('data-copy');
-      var def = el.getAttribute('data-default');
+      var v = variantFor(id);
+      var useId = v ? v.id : id;
+      var def = v ? v.def : el.getAttribute('data-default');
       /* A default already registered from funnel.config.js wins over the
          placeholder sitting in the markup — that is how [BRAND] becomes the
          real name on pages the engine does not render itself. */
       if (def == null) def = DEFAULTS[id] != null ? DEFAULTS[id] : el.textContent.trim();
-      if (DEFAULTS[id] == null) DEFAULTS[id] = def;
-      var raw = draft[id] != null ? draft[id] : (COPY[id] != null ? COPY[id] : def);
+      if (DEFAULTS[useId] == null) DEFAULTS[useId] = def;
+      if (EDIT) el.setAttribute('data-copy-id', useId);
+      var raw = draft[useId] != null ? draft[useId] : (COPY[useId] != null ? COPY[useId] : def);
       /* {first_name} and friends — and [label](href) links — stay visible while
          editing so they can be moved or removed; visitors get them resolved */
       if (EDIT) { el.textContent = raw; return; }
@@ -925,7 +988,8 @@
       el.setAttribute('contenteditable', 'plaintext-only');
       el.setAttribute('spellcheck', 'true');
       el.addEventListener('input', function () {
-        draft[el.getAttribute('data-copy')] = el.innerText.replace(/\s+$/, '');
+        draft[el.getAttribute('data-copy-id') || el.getAttribute('data-copy')] =
+          el.innerText.replace(/\s+$/, '');
         saveDraft();
         updateBar();
       });
@@ -1040,6 +1104,7 @@
   /* ------------------------------------------------------------- export */
 
   seedBrandCopy();
+  registerVariants();
 
   global.Funnel = {
     QUESTIONS: QUESTIONS,
@@ -1050,6 +1115,7 @@
     hydrate: hydrate,
     merges: mergeValues,
     fill: fillTemplate,
+    segment: currentSeg,
     quiz: quiz,
     config: CFG,
     cfg: cfg,
