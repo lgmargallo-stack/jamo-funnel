@@ -23,7 +23,12 @@
     'fbclid', 'ttclid', 'gclid', 'lang'
   ];
 
+  /* sessionStorage, not localStorage: answers live as long as the tab does.
+     Close it, or come back tomorrow from a new ad click, and the quiz starts
+     from the age gate. They still survive the hops to scratch / plan / offer,
+     because those are the same tab. */
   var STORE = 'bq.answers.v1';
+  var store = window.sessionStorage;
 
   // One question = one object. Add, remove or reorder freely: the progress
   // rail, the step count and the desktop index all read from this array.
@@ -106,7 +111,7 @@
     age: { id: 'authority', kind: 'authority' },
     goal: { id: 'relief', kind: 'relief',
       title: "That's fixable — and faster than you think",
-      body: 'Wanting {goal} is not the hard part. Knowing the order to do things in is, and that is the whole of what your plan gives you.' },
+      body: 'Wanting to {goal_lower} is not the hard part. Knowing the order to do things in is, and that is the whole of what your plan gives you.' },
     slipped: { id: 'insight', kind: 'insight',
       title: 'Every one of those is trainable',
       body: "Trust and emotional distance aren't personality flaws — they're patterns, and patterns respond to a sequence. Your plan starts with the two you picked." }
@@ -117,13 +122,18 @@
   /* -------------------------------------------------------------- store */
 
   function read() {
-    try { return JSON.parse(localStorage.getItem(STORE)) || {}; }
+    try { return JSON.parse(store.getItem(STORE)) || {}; }
     catch (e) { return {}; }
   }
   function write(data) {
-    try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {}
+    try { store.setItem(STORE, JSON.stringify(data)); } catch (e) {}
   }
-  function set(key, value) { var d = read(); d[key] = value; write(d); return d; }
+  function set(key, value) {
+    var d = read(); d[key] = value; d.updatedAt = Date.now(); write(d); return d;
+  }
+  function clear() { try { store.removeItem(STORE); } catch (e) {} }
+
+
 
   /* ------------------------------------------------------------- params */
 
@@ -265,9 +275,9 @@
               '<span class="agecard__foot"><span class="agecard__label">' + esc(o.label) + '</span>' + ICON.chev + '</span>' +
             '</button>';
           }).join('') + '</div>' +
+          '<div class="step__foot"><p class="cta-note">By continuing you agree to our <a href="#">Terms</a>, ' +
+            '<a href="#">Privacy Policy</a> and <a href="#">Subscription Terms</a>.</p></div>' +
         '</div>' +
-        '<div class="step__foot"><p class="cta-note">By continuing you agree to our <a href="#">Terms</a>, ' +
-          '<a href="#">Privacy Policy</a> and <a href="#">Subscription Terms</a>.</p></div>' +
       '</div>';
     }
 
@@ -303,13 +313,14 @@
               '<div class="q-index"><span class="q-index__n">' + String(n).padStart(2, '0') + '</span>' +
                 '<span class="q-index__of">/ ' + qCount + '</span></div>' +
             '</div>' +
-            '<div class="options">' + options + '</div>' +
-          '</div>' +
-          '<div class="step__foot">' +
-            (multi
-              ? '<p class="foot-note foot-note--live" data-count>' + picked.length + ' selected</p>' +
-                '<button class="btn" type="button" data-act="next"' + (picked.length ? '' : ' disabled') + '>Continue</button>'
-              : '<p class="foot-note">Tap an answer to continue</p>') +
+            '<div class="options">' + options +
+              '<div class="step__foot">' +
+                (multi
+                  ? '<p class="foot-note foot-note--live" data-count>' + picked.length + ' selected</p>' +
+                    '<button class="btn" type="button" data-act="next"' + (picked.length ? '' : ' disabled') + '>Continue</button>'
+                  : '<p class="foot-note">Tap an answer to continue</p>') +
+              '</div>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -328,26 +339,29 @@
           '</div>' +
           '<p class="q-sub" style="margin-top:22px">Built on published research into attachment and re-connection — ' +
             '<a href="#">[SOURCE 1]</a>, <a href="#">[SOURCE 2]</a>. Cite what you actually used.</p>' +
+          '<div class="step__foot"><button class="btn" type="button" data-act="next">Continue</button></div>' +
         '</div>' +
-        '<div class="step__foot"><button class="btn" type="button" data-act="next">Continue</button></div>' +
       '</div>';
     }
 
     function renderBeat(d) {
+      /* The insight beat carries a photo, so it splits. The relief beat is
+         copy only — it gets the same single column as every other text screen
+         rather than sitting in an empty half. */
       var dark = d.kind === 'insight';
       return '<div class="app fade' + (dark ? ' dark' : '') + '">' +
         topbar({}) +
-        '<div class="split">' +
-          '<div class="split__col">' +
+        '<div class="' + (dark ? 'split' : '') + '">' +
+          '<div class="' + (dark ? 'split__col' : '') + '">' +
             '<div class="panel panel--narrow" style="padding-top:26px;display:flex;flex-direction:column;gap:16px">' +
               '<span class="eyebrow eyebrow--cold">Worth knowing</span>' +
               '<h1 class="h1">' + esc(d.title) + '</h1>' +
               '<p class="lede">' + esc(fillTemplate(d.body)) + '</p>' +
+              '<div class="step__foot"><button class="btn' + (dark ? ' btn--light' : '') + '" type="button" data-act="next">Continue</button></div>' +
             '</div>' +
           '</div>' +
           (dark ? '<div class="split__col split__col--media"><div class="media">[PHOTO — MAN, EARLY MORNING, CALM]</div></div>' : '') +
         '</div>' +
-        '<div class="step__foot"><button class="btn' + (dark ? ' btn--light' : '') + '" type="button" data-act="next">Continue</button></div>' +
       '</div>';
     }
 
@@ -393,9 +407,9 @@
           '<label class="checkrow"><input type="checkbox" name="optin"><span class="checkrow__box">' + ICON.tick + '</span>' +
             '<span class="checkrow__text">Also send me weekly tactics and updates. Separate from your plan — skip it and still continue.</span></label>' +
           '<p class="checkrow__text" style="text-align:left">We don\'t sell your data and one click unsubscribes you. <a href="#">Privacy Policy</a>.</p>' +
+          '<div class="step__foot"><button class="btn" type="button" data-act="email">Send my plan</button>' +
+            '<p class="foot-note">Next: your name and hers</p></div>' +
         '</div>' +
-        '<div class="step__foot"><button class="btn" type="button" data-act="email">Send my plan</button>' +
-          '<p class="foot-note">Next: your name and hers</p></div>' +
       '</div>';
     }
 
@@ -413,8 +427,8 @@
           '<div style="width:100%"><span class="field__label">Her name</span>' +
             '<label class="field"><input type="text" name="her_name" placeholder="Type her name" required></label></div>' +
           '<p class="checkrow__text" style="text-align:left">Names stay on your plan. We never message anyone on your behalf.</p>' +
+          '<div class="step__foot"><button class="btn" type="button" data-act="names">Continue</button></div>' +
         '</div>' +
-        '<div class="step__foot"><button class="btn" type="button" data-act="names">Continue</button></div>' +
       '</div>';
     }
 
@@ -571,19 +585,12 @@
       render();
     });
 
-    // Resume where they left off if they reload mid-quiz.
-    var startAt = 0;
-    var saved = read();
-    for (var k = 0; k < steps.length; k++) {
-      var st = steps[k];
-      if (st.kind === 'question') {
-        var v = saved[st.q.id];
-        if (v == null || (Array.isArray(v) && !v.length)) { startAt = k; break; }
-      }
-      startAt = k;
-    }
-    i = Math.min(startAt, steps.length - 1);
-    history.replaceState({ step: i }, '', '#' + (i + 1));
+    /* Every load of the quiz is a fresh start — no half-finished state, no
+       landing on a screen you don't remember reaching. Refreshing restarts it
+       too; that is the deliberate trade for predictability. */
+    clear();
+    i = 0;
+    history.replaceState({ step: 0 }, '', '#1');
     render();
   }
 
@@ -591,7 +598,7 @@
 
   global.Funnel = {
     QUESTIONS: QUESTIONS,
-    answers: { read: read, write: write, set: set },
+    answers: { read: read, write: write, set: set, clear: clear },
     link: link,
     go: go,
     hydrate: hydrate,

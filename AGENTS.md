@@ -28,6 +28,17 @@ three pages are the post-quiz flow.
    other accent is `--cold`. Do not introduce new colours; use the tokens at
    the top of `funnel.css`.
 7. **Minimum 44px hit targets** on anything tappable.
+7b. **One button placement rule, no exceptions:** the primary action is the
+   last element of the column it completes, 28px below it, inheriting that
+   column's alignment. Never pin it to the bottom of the viewport (it falls
+   below the fold on short-copy screens) and never centre it under
+   left-aligned copy (it detaches from what it acts on).
+7d. **Every button variant states its own `:hover`.** The base
+   `.btn:hover{background:#000}` leaked onto `.btn--light` once and painted a
+   white button black on a black screen. A variant without its own hover is a
+   bug, not a default.
+7c. **The loader runs 4 seconds total** (`total` in `runLoader`). It is a
+   pause for effect, not a real computation; do not lengthen it.
 8. **Ad params must survive every hop.** Use `Funnel.link()` / `Funnel.go()`
    for internal navigation — never a bare `href` between funnel pages.
 
@@ -59,8 +70,16 @@ build-onefile.mjs  regenerates the single-file preview (optional)
 `[CC_PRODUCT_4W]` `[CC_PRODUCT_12W]` `[CC_PRODUCT_24W]` `[VISA]` `[MC]`
 `[APPLE]` `[PAYPAL]`, plus the two bracketed FAQ answers in `offer.html`.
 
+## Session behaviour
+
+Answers live in `sessionStorage`, not `localStorage`. They survive the hops to
+scratch / plan / offer because those are the same tab, and they are gone when
+the tab closes. Every load of `index.html` clears the store and starts at the
+age gate — refreshing mid-quiz restarts it, deliberately. Do not "improve"
+this into a resume feature.
+
 ## Testing
 
 Serve over http (not `file://`) and walk the whole funnel on a 390px viewport
-and a 1440px one. `?fast=1` shortens the loader. Clear `localStorage` between
-runs — the quiz resumes where you left off by design.
+and a 1440px one. `?fast=1` shortens the loader. No storage to clear between
+runs — reloading the quiz is the reset.

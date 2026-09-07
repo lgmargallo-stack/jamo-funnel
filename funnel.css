@@ -189,23 +189,24 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .opt__box svg{display:none}
 .opt.is-on .opt__box svg{display:block}
 
-/* One placement rule for every screen: on a phone the action is a full-width
-   bar pinned to the bottom; on desktop it is a fixed-width button centred under
-   the content. Never offset per screen type — that is what looked arbitrary. */
+/* THE BUTTON RULE — one sentence, no exceptions:
+   the primary action is the last element of the column it completes, 28px
+   below it, left-aligned to that column.
+   It is never pinned to the bottom of the viewport and never centred under
+   a left-aligned block: both of those detach it from the thing it acts on,
+   and the first one pushes it below the fold on short-copy screens. */
 .step__foot{
-  margin-top:auto; padding:22px var(--gutter) 34px;
   display:flex; flex-direction:column; gap:10px; align-items:stretch;
-  position:sticky; bottom:0; background:var(--paper);
-  border-top:1px solid var(--line-2);
+  width:100%; margin-top:28px; padding:0 0 40px;
 }
-.dark .step__foot{background:var(--ink); border-top-color:#22262D}
 @media (min-width:900px){
-  .step__foot{
-    position:static; border-top:0; align-items:center;
-    padding:36px var(--gutter) 52px; gap:12px;
-  }
-  .step__foot .btn{width:420px}
-  .step__foot .foot-note{text-align:center}
+  .step__foot{margin-top:32px; padding-bottom:56px}
+  /* the action inherits its column's alignment: left under left-aligned copy,
+     centred under the centred capture screens */
+  .panel--centred .step__foot{align-items:center}
+}
+@media (min-width:900px){
+  .step__foot .btn{max-width:420px}
 }
 .foot-note{
   font-family:var(--mono); font-size:9px; letter-spacing:.06em;
@@ -223,12 +224,22 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   letter-spacing:.08em; text-transform:uppercase;
 }
 @media (min-width:900px){ .btn{min-height:60px; font-size:15px} }
+/* Every variant states its own hover. The base rule used to leak onto
+   .btn--light, painting the white button black on the dark screens — an
+   invisible control. A variant without a hover of its own is a bug. */
+.btn{transition:background-color .15s ease, color .15s ease}
 .btn:hover{background:#000}
-.btn[disabled]{background:var(--line); color:var(--mute); cursor:not-allowed}
+.btn:active{transform:translateY(1px)}
+.btn[disabled], .btn[disabled]:hover{
+  background:var(--line); color:var(--mute); cursor:not-allowed; transform:none;
+}
 .btn--ghost{background:transparent; color:var(--ink); border:1px solid var(--ink)}
-.btn--ghost:hover{background:var(--shade)}
+.btn--ghost:hover{background:var(--shade); color:var(--ink)}
 .btn--quiet{background:transparent; color:var(--slate); border:1px solid var(--line)}
+.btn--quiet:hover{background:var(--shade); color:var(--ink)}
 .btn--light{background:var(--paper); color:var(--ink)}
+.btn--light:hover{background:#E4E7EC; color:var(--ink)}
+@media (prefers-reduced-motion:reduce){ .btn{transition:none} .btn:active{transform:none} }
 .btn--inline{width:auto; min-height:46px; padding:0 22px; font-size:12px}
 
 /* ------------------------------------------------------------- panels -- */
@@ -309,11 +320,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
   height:236px; font-family:var(--mono); font-size:9px; color:var(--slate);
   letter-spacing:.06em;
 }
-@media (min-width:900px){ .media{height:100%; min-height:420px; font-size:11px} }
+@media (min-width:900px){ .media{height:100%; min-height:540px; font-size:11px} }
 .split{display:flex; flex-direction:column; gap:0}
 @media (min-width:900px){
+  /* the container fills the screen so the photo runs full height; the copy
+     column still starts at the top, which is what keeps the action in view */
   .split{flex-direction:row; align-items:stretch; min-height:calc(100dvh - 80px)}
-  .split__col{flex:1 1 50%; display:flex; flex-direction:column; justify-content:center; padding:0 var(--gutter)}
+  .split__col{
+    flex:1 1 50%; display:flex; flex-direction:column;
+    justify-content:flex-start; padding:64px var(--gutter) 0;
+  }
   .split__col--media{padding:0}
 }
 
