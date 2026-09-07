@@ -57,7 +57,7 @@ window.FUNNEL_CONFIG = {
     /* Edit mode. true while you build, then EITHER false to switch it off
        for good, OR a word of your choosing so ?edit=<word> still works and
        you can keep fixing copy on the live site. See README before you pick. */
-    edit: 'false',
+    edit: false,
 
     ageGate: true,          // first screen is the age grid
     scratch: true,          // discount reveal between quiz and plan
