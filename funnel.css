@@ -378,18 +378,44 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .modal__actions{display:flex; gap:10px}
 .modal__actions .btn{min-height:52px; font-size:13px}
 
+/* determinate bar — the modal below and nothing else uses it */
+.progress{height:4px; width:100%; background:var(--line); overflow:hidden}
+.progress span{
+  display:block; height:100%; width:0; background:var(--cold);
+  transition:width 1.5s linear;
+}
+.progress.is-running span{width:100%}
+@media (prefers-reduced-motion:reduce){ .progress span{transition:width .3s linear} }
+.modal__steps{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:10px; gap:12px;
+}
+
 /* ------------------------------------------------------------ scratch -- */
 /* the scratch page is a single centred column — copy, card and action on
    one axis */
-/* compound selector: .page sets a wider measure later in this file */
+/* Compound selector: .page sets a wider measure later in this file.
+   Spacing here is a scale, not a single gap — tight inside a thought
+   (eyebrow → headline), looser between them (lede → card), loosest before
+   the action. A uniform gap makes every element look equally important. */
 .page.scratchpage{
   display:flex; flex-direction:column; align-items:center; text-align:center;
-  gap:14px; max-width:560px; padding-top:24px;
+  gap:0; max-width:520px; padding-top:28px;
 }
-.scratchpage .lede{max-width:44ch}
-.scratchpage .step__foot{align-items:center; max-width:420px}
-.scratchpage .scratch{margin-top:10px}
-@media (min-width:900px){ .scratchpage{padding-top:56px; gap:16px} }
+.scratchpage .eyebrow{margin-bottom:10px}
+.scratchpage .h1{margin-bottom:12px; max-width:16ch}
+.scratchpage .lede{max-width:40ch; margin-bottom:36px}
+.scratchpage .scratch{margin-bottom:20px}
+.scratchpage .scratch__done{margin-bottom:6px}
+.scratchpage .foot-note{margin-bottom:0}
+.scratchpage .step__foot{align-items:center; max-width:420px; margin-top:28px}
+@media (min-width:900px){
+  .page.scratchpage{padding-top:64px; max-width:560px}
+  .scratchpage .h1{margin-bottom:14px}
+  .scratchpage .lede{margin-bottom:44px}
+  .scratchpage .scratch{margin-bottom:24px}
+  .scratchpage .step__foot{margin-top:32px}
+}
 
 .scratch{
   position:relative; width:100%; max-width:480px; margin:0 auto;
@@ -550,9 +576,33 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @media (min-width:900px){
   .tiers{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; align-items:end}
 }
-.tier{border:1px solid var(--line); padding:16px; display:flex; flex-direction:column; gap:6px; width:100%; text-align:left}
+.tier{
+  position:relative; border:1px solid var(--line); background:var(--paper);
+  padding:16px; display:flex; flex-direction:column; gap:6px;
+  width:100%; text-align:left;
+  transition:border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+/* SELECTED STATE — border, fill, ring and a filled marker all move together.
+   One of those alone reads as a hover; four of them read as "chosen". The
+   accent here is --cold: warm stays reserved for price and savings. */
+.tier.is-on{
+  border-color:var(--cold); background:var(--cold-tint);
+  box-shadow:inset 0 0 0 1px var(--cold);
+}
+.tier__mark{
+  width:22px; height:22px; flex:0 0 22px; margin-right:12px;
+  border:1px solid var(--field); background:var(--paper);
+  display:flex; align-items:center; justify-content:center;
+}
+.tier__mark svg{display:none}
+.tier.is-on .tier__mark{background:var(--cold); border-color:var(--cold)}
+.tier.is-on .tier__mark svg{display:block}
+.tier__head{display:flex; align-items:center; min-width:0}
+@media (prefers-reduced-motion:reduce){ .tier{transition:none} }
 @media (min-width:900px){ .tier{padding:30px 28px; gap:14px} }
-.tier:hover{border-color:var(--ink)}
+/* hover must not out-rank selection: same specificity, and it is declared
+   later, so it needs the :not() guard */
+.tier:not(.is-on):hover{border-color:var(--ink)}
 .tier__row{display:flex; align-items:center; justify-content:space-between; gap:16px}
 @media (min-width:900px){ .tier__row{flex-direction:column; align-items:flex-start; gap:14px} }
 .tier__name{font-family:var(--disp); font-size:15px; font-weight:700}
@@ -569,7 +619,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 @media (min-width:900px){
   .tier__blurb{display:block; font-size:14px; line-height:1.5; color:var(--slate); border-top:1px solid var(--line-2); padding-top:14px}
 }
-.tier--pick{border:1.5px solid var(--ink); padding:0}
+.tier--pick{border:1px solid var(--line); padding:0}
 .tier--pick .tier__inner{padding:16px}
 @media (min-width:900px){ .tier--pick .tier__inner{padding:34px 28px 30px; display:flex; flex-direction:column; gap:14px} }
 .tier__flag{

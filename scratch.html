@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Jamo Dating Protocols — Your discount</title>
+<title>[BRAND] — Your discount</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
 
 <div class="app">
   <header class="topbar"><div class="topbar__side"></div>
-    <span class="wordmark">Jamo Dating Protocols</span>
+    <span class="wordmark">[BRAND]</span>
     <div class="topbar__side topbar__side--end"></div>
   </header>
 
@@ -53,6 +53,22 @@
     <span>[COMPANY] · [ADDRESS]</span>
     <span><a href="#">Terms</a> · <a href="#">Privacy</a> · <a href="#">Subscription Terms</a></span>
   </footer>
+</div>
+
+<!-- Shown for 1.5s the moment the page opens, before the panel is usable.
+     The pause is the point: a discount that is simply there reads as
+     decoration, one you watched being reserved reads as a thing that happened
+     to your account. -->
+<div class="modal" id="applyModal">
+  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="applyTitle">
+    <span class="eyebrow">One moment</span>
+    <h2 class="modal__title" id="applyTitle">Reserving your discount</h2>
+    <div class="progress" id="applyBar"><span></span></div>
+    <div class="modal__steps">
+      <span class="foot-note" id="applyStep" aria-live="polite">Checking eligibility</span>
+      <span class="foot-note" id="applyPct">0%</span>
+    </div>
+  </div>
 </div>
 
 <script src="funnel.js"></script>
@@ -137,6 +153,34 @@ Funnel.hydrate();
     });
   }
 
+  /* The stall runs once, on arrival, before the panel is touchable. 1.5s is
+     the sweet spot — long enough to read as a system doing something, short
+     enough that nobody taps away. */
+  var APPLY_MS = 1500;
+
+  function bootStall() {
+    var modal = document.getElementById('applyModal');
+    var bar   = document.getElementById('applyBar');
+    var step  = document.getElementById('applyStep');
+    var pct   = document.getElementById('applyPct');
+
+    requestAnimationFrame(function () { bar.classList.add('is-running'); });
+
+    var t0 = Date.now();
+    var tick = setInterval(function () {
+      var p = Math.min(100, Math.round((Date.now() - t0) / APPLY_MS * 100));
+      pct.textContent = p + '%';
+      if (p > 40 && p < 80) step.textContent = 'Reserving your rate';
+      if (p >= 80) step.textContent = 'Ready';
+    }, 60);
+
+    setTimeout(function () {
+      clearInterval(tick);
+      modal.hidden = true;
+      document.body.classList.add('is-ready');
+    }, APPLY_MS);
+  }
+
   function reveal() {
     if (revealed) return;
     revealed = true;
@@ -155,6 +199,7 @@ Funnel.hydrate();
   }
 
   size();
+  bootStall();
   window.addEventListener('resize', function () { if (!revealed) size(); });
 
   cv.addEventListener('pointerdown', function (e) {
