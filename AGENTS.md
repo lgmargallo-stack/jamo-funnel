@@ -60,8 +60,14 @@ three pages are the post-quiz flow.
 
 ## Honesty constraints — these are compliance, not taste
 
-- No invented review text, no invented user counts, no fabricated ratings.
-  Placeholders stay bracketed until real content replaces them.
+- The three reviews on the loader screen are SAMPLE copy, and each card says
+  "Sample review" on its face so nobody mistakes them for customers. They exist
+  so the funnel is presentable in review. Replace all three with real reviews
+  before the first paid click, and change the meta line at the same time —
+  never strip the "Sample review" label while the words are still invented.
+- No invented user counts, no fabricated ratings, no stock headshots passed off
+  as customers (the monogram avatars are placeholders on purpose). Every other
+  placeholder stays bracketed until real content replaces it.
 - The renewal terms under the checkout button stay in readable type and stay
   accurate to what the checkout actually charges.
 - Cancellation stays one click. Do not add email-only cancellation.
@@ -76,8 +82,16 @@ plan.html     lead page (merge fields)
 offer.html    tiers, bump, checkout hand-off
 funnel.css    all styling, mobile-first
 funnel.js     quiz engine, answer store, merge fields, param passthrough
+copy.js       every visible string, by id
 build-onefile.mjs  regenerates the single-file preview (optional)
+bump.mjs      stamps ?v= on the assets — run before every push
 ```
+
+## Deploying
+
+Run `node bump.mjs` before committing. It re-stamps `?v=` on funnel.css,
+copy.js and funnel.js in all four pages. Without it the browser serves the
+cached copies and a pushed copy change looks like it silently failed.
 
 ## Copy
 

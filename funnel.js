@@ -150,6 +150,20 @@
 
   var LOADER_PHASES = ['Mapping your situation', 'Scoring her signals', 'Selecting your modules'];
 
+  /* Sample social proof for the loader screen.
+     These are SAMPLE copy so the funnel is presentable in review — every card
+     says so on its face, and the names are initials, not invented people with
+     verified badges. Replace all three with real reviews before you spend a
+     dollar on traffic; do not remove the SAMPLE meta until you do. */
+  var REVIEWS = [
+    { initials: 'M T', name: 'Marcus T.', meta: 'Sample review',
+      body: 'Week one was mostly about me, not about her. That turned out to be the part I had been getting wrong.' },
+    { initials: 'D R', name: 'Daniel R.', meta: 'Sample review',
+      body: 'The order was what made the difference. I had been doing roughly the right things at completely the wrong time.' },
+    { initials: 'J O', name: 'James O.', meta: 'Sample review',
+      body: 'First time in two months I got through a whole day without checking her profile. That alone was worth it.' }
+  ];
+
   // The micro-commitment asked mid-loader. Edit mode never runs the loader, so
   // this and the modal's buttons are registered by hand below to keep them in
   // copy.js.
@@ -460,15 +474,15 @@
         }).join('') + '</div></div>' +
         '<div class="panel" style="padding-top:40px;padding-bottom:34px">' +
           C('loader.reviews_label', 'What men say after week one', 'p', 'class="eyebrow" style="margin-bottom:14px"') +
-          '<div class="reviews">' + [1, 2, 3].map(function (n) {
-            return '<div class="card"><div class="review__head"><span class="review__av">[I]</span>' +
-              '<span>' +
-                C('review' + n + '.name', '[REAL NAME]', 'span', 'class="review__name"') + '<br>' +
-                C('review' + n + '.meta', '[VERIFIED · DATE]', 'span', 'class="review__meta"') +
+          '<div class="reviews">' + REVIEWS.map(function (r, idx) {
+            var n = idx + 1;
+            return '<div class="card"><div class="review__head">' +
+              C('review' + n + '.initials', r.initials, 'span', 'class="review__av"') +
+              '<span class="review__id">' +
+                C('review' + n + '.name', r.name, 'span', 'class="review__name"') +
+                C('review' + n + '.meta', r.meta, 'span', 'class="review__meta"') +
               '</span></div>' +
-              C('review' + n + '.body',
-                '[Paste a real review. Collect five before launch — do not ship invented ones.]',
-                'p', 'class="review__body"') +
+              C('review' + n + '.body', r.body, 'p', 'class="review__body"') +
             '</div>';
           }).join('') + '</div>' +
         '</div>' +
@@ -759,6 +773,25 @@
     });
   }
 
+  /* Clipboard, with the old-school fallback for anything that refuses the
+     async API. If both fail the text is left selected, so Cmd+C still works. */
+  function toClipboard(text, done) {
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      if (ok) ta.remove(); else setTimeout(function () { ta.remove(); }, 8000);
+      done(ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, fallback);
+    } else fallback();
+  }
+
   function download(name, text) {
     var url = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
     var a = document.createElement('a');
@@ -802,13 +835,24 @@
         '<span id="editStep">' + nav.label + '</span>' +
         '<button type="button" data-ed="next" aria-label="Next screen">›</button>' +
       '</span>' : '') +
-      '<button type="button" class="editbar__btn" data-ed="save">Download copy.js</button>' +
+      /* Copy first, Download second. Chrome and Safari quietly refuse .js
+         downloads on some machines, and a button that does nothing is worse
+         than no button — the clipboard always works. */
+      '<button type="button" class="editbar__btn" data-ed="clip">Copy copy.js</button>' +
+      '<button type="button" class="editbar__btn editbar__btn--quiet" data-ed="save">Download</button>' +
       '<button type="button" class="editbar__btn editbar__btn--quiet" data-ed="reset">Discard</button>';
     bar.addEventListener('click', function (e) {
       var b = e.target.closest('[data-ed]');
       if (!b) return;
       var a = b.getAttribute('data-ed');
       if (a === 'save') download('copy.js', copyFile());
+      if (a === 'clip') {
+        toClipboard(copyFile(), function (ok) {
+          var was = b.textContent;
+          b.textContent = ok ? 'Copied — paste into copy.js' : 'Press Cmd+C now';
+          setTimeout(function () { b.textContent = was; }, ok ? 2600 : 4000);
+        });
+      }
       if (a === 'reset' && confirm('Discard all copy edits made in this browser?')) {
         draft = {}; saveDraft(); location.reload();
       }

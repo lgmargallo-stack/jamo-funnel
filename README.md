@@ -11,7 +11,12 @@ offer.html     tiers, bump, checkout hand-off
 funnel.css     every screen, mobile-first, one breakpoint at 900px
 funnel.js      quiz engine, answer store, merge fields, param passthrough
 copy.js        every visible string on the site, by id
+bump.mjs       stamps ?v= on the assets so pushes aren't cached
 ```
+
+Run `node bump.mjs` before every `git push`. It re-stamps `?v=` on the three
+assets in all four pages; without it your browser keeps serving the old
+funnel.js and copy.js and a pushed change looks like it did nothing.
 
 Open `index.html` and it runs. Add `?fast=1` to shorten the loader while testing.
 
@@ -58,17 +63,23 @@ http://localhost:5500/offer.html?edit=1
 ```
 
 Every string on the site gets a dashed outline — headlines, answers, button
-labels, the loader's phase names, the review placeholders, the legal line, the
+labels, the loader's phase names, the sample reviews, the legal line, the
 footer. Click one and type. A bar at the bottom counts your changes; on the
 quiz it also has ‹ › arrows to walk all 17 screens, because clicking an answer
 in edit mode types rather than advances.
 
-Changes are kept in your browser as you work, so you can reload freely. When
-you're done, click **Download copy.js** and replace the `copy.js` in the
-project with it. That file is what the site reads from then on — the strings in
+Changes are kept in your browser as you work, so you can reload freely.
+
+When you're done, click **Copy copy.js**, open `copy.js` in Cursor, select all
+and paste. That is the reliable route — some browsers silently refuse `.js`
+downloads. **Download** does the same thing as a file if your browser allows
+it. Either way, `copy.js` is what the site reads from then on; the strings in
 the markup become fallbacks.
 
-`copy.js` ships complete: all 212 ids are already in it, from every page. So a
+Then `node bump.mjs`, commit, push — and click **Discard** on the live page so
+your local draft stops masking what actually deployed.
+
+`copy.js` ships complete: all 215 ids are already in it, from every page. So a
 download taken while editing the quiz still carries the offer page's copy, and
 you can equally edit the file directly in Cursor instead of on the page.
 
@@ -88,12 +99,16 @@ visible to visitors — no bar, no outlines, no editable text.
 Two things aren't editable on purpose: prices and rebill terms live in `TIERS`
 in `offer.html`, because a price that can be edited in two places is a price
 that will eventually disagree with the checkout; and photo slots
-(`[PHOTO …]`, `[I]`) are image placeholders, not copy.
+(`[PHOTO …]`) and the monogram avatars are image placeholders, not copy.
 
 ## Before you ship
 
 - `[BRAND]`, `[COMPANY]`, `[ADDRESS]`, `[REAL NUMBER]`, `[N]`, `[SOURCE n]`,
-  photo slots, review text and two FAQ answers are placeholders.
+  photo slots and two FAQ answers are placeholders.
+- The three reviews on the loader screen are **sample copy**, labelled "Sample
+  review" on each card, with monogram initials instead of faces. They are there
+  so the funnel demos properly. Replace them with real reviews — and only then
+  change the "Sample review" line — before you run traffic.
 - Prices in `offer.html` are drafts. Replace `TIERS` with your real Checkout
   Champ products and set `[CHECKOUT_URL]`.
 - Ad params (`sid`, `adset_name`, `ad_name`, `placement`, utm, click ids) ride
