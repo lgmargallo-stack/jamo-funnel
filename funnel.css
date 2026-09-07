@@ -362,8 +362,16 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 /* -------------------------------------------------------------- modal -- */
 .modal{
   position:fixed; inset:0; z-index:40;
-  background:rgba(11,13,16,.62);
+  /* lighter scrim than before because the blur is doing the separating —
+     stacking a heavy tint on top of a blur just muddies the page */
+  background:rgba(11,13,16,.45);
+  -webkit-backdrop-filter:blur(10px);
+  backdrop-filter:blur(10px);
   display:flex; align-items:center; justify-content:center; padding:20px;
+}
+/* no blur support: fall back to the old, heavier tint so the card still reads */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .modal{background:rgba(11,13,16,.72)}
 }
 .modal__card{
   background:var(--paper); width:100%; max-width:326px;
@@ -380,12 +388,13 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 /* determinate bar — the modal below and nothing else uses it */
 .progress{height:4px; width:100%; background:var(--line); overflow:hidden}
+/* Width is set from JS on a schedule — jumps, crawls and a stall — because a
+   perfectly linear bar reads as a timer, and a hesitant one reads as work. */
 .progress span{
   display:block; height:100%; width:0; background:var(--cold);
-  transition:width 1.5s linear;
+  transition:width .22s cubic-bezier(.3,.9,.4,1);
 }
-.progress.is-running span{width:100%}
-@media (prefers-reduced-motion:reduce){ .progress span{transition:width .3s linear} }
+@media (prefers-reduced-motion:reduce){ .progress span{transition:width .1s linear} }
 .modal__steps{
   display:flex; align-items:center; justify-content:space-between;
   margin-top:10px; gap:12px;
@@ -398,23 +407,55 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
    Spacing here is a scale, not a single gap — tight inside a thought
    (eyebrow → headline), looser between them (lede → card), loosest before
    the action. A uniform gap makes every element look equally important. */
+/* This page must not scroll: it is one moment, and a scrollbar under it
+   implies there is more to do. The stack sizes itself to the space left over
+   after the header and footer, and the card is the element that gives — it
+   keeps its ratio and takes whatever height remains. */
 .page.scratchpage{
-  display:flex; flex-direction:column; align-items:center; text-align:center;
-  gap:0; max-width:520px; padding-top:28px;
+  flex:1 1 auto; min-height:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:0; max-width:520px; width:100%; min-width:0;
+  padding-top:16px; padding-bottom:16px;
 }
 .scratchpage .eyebrow{margin-bottom:10px}
-.scratchpage .h1{margin-bottom:12px; max-width:16ch}
-.scratchpage .lede{max-width:40ch; margin-bottom:36px}
-.scratchpage .scratch{margin-bottom:20px}
+.scratchpage .h1{
+  margin-bottom:10px; max-width:16ch;
+  font-size:clamp(22px, 5.8vw, 30px); line-height:1.08;
+}
+.scratchpage .lede{max-width:40ch; margin-bottom:clamp(18px, 3.4vh, 36px); font-size:14.5px}
+/* width-led, height-capped: sizing by height made the derived width (ratio
+   6/5) wider than the phone and pushed the whole column sideways */
+.scratchpage .scratch{
+  width:100%; max-width:420px; height:auto;
+  max-height:clamp(190px, 36vh, 330px);
+  margin-bottom:clamp(12px, 2.2vh, 20px);
+}
 .scratchpage .scratch__done{margin-bottom:6px}
 .scratchpage .foot-note{margin-bottom:0}
-.scratchpage .step__foot{align-items:center; max-width:420px; margin-top:28px}
+.scratchpage .step__foot{
+  align-items:center; width:100%; max-width:420px;
+  margin-top:clamp(16px, 3vh, 28px); padding-bottom:0;
+}
 @media (min-width:900px){
-  .page.scratchpage{padding-top:64px; max-width:560px}
-  .scratchpage .h1{margin-bottom:14px}
-  .scratchpage .lede{margin-bottom:44px}
-  .scratchpage .scratch{margin-bottom:24px}
-  .scratchpage .step__foot{margin-top:32px}
+  .page.scratchpage{max-width:560px; padding-top:16px; padding-bottom:16px}
+  .scratchpage .h1{font-size:clamp(30px, 3.2vw, 44px)}
+  .scratchpage .lede{font-size:17px}
+  .scratchpage .scratch{max-width:440px; max-height:clamp(240px, 40vh, 380px)}
+}
+/* Short viewports — small laptops, older phones. Everything compresses by one
+   step before anything is removed; the supporting line only goes when there is
+   genuinely no room for it. */
+@media (max-height:800px){
+  .page.scratchpage{padding-top:12px; padding-bottom:12px}
+  .scratchpage .h1{font-size:clamp(22px, 2.6vw, 30px); margin-bottom:8px}
+  .scratchpage .lede{font-size:14px; margin-bottom:16px}
+  .scratchpage .scratch{max-height:clamp(170px, 28vh, 260px); margin-bottom:12px}
+  .scratchpage .step__foot{margin-top:16px}
+  .sitefoot{padding:10px var(--gutter) 12px}
+}
+@media (max-height:640px){
+  .scratchpage .lede{display:none}
+  .scratchpage .scratch{max-height:clamp(140px, 24vh, 200px)}
 }
 
 .scratch{
@@ -672,7 +713,7 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 .sitefoot{
   display:flex; flex-direction:column; gap:8px; align-items:center;
-  padding:26px var(--gutter) 34px; border-top:1px solid var(--line-2);
+  padding:16px var(--gutter) 20px; border-top:1px solid var(--line-2);
   font-family:var(--mono); font-size:9px; letter-spacing:.06em;
   text-transform:uppercase; color:var(--faint); text-align:center;
 }

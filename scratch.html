@@ -153,29 +153,39 @@ Funnel.hydrate();
     });
   }
 
-  /* The stall runs once, on arrival, before the panel is touchable. 1.5s is
-     the sweet spot — long enough to read as a system doing something, short
-     enough that nobody taps away. */
-  var APPLY_MS = 1500;
+  /* The stall runs once, on arrival, before the panel is touchable.
+     The schedule below is the whole trick: real systems don't advance
+     smoothly, they jump, crawl and hang. A linear bar reads as a countdown;
+     this one reads as something being checked. Times are ms from the start,
+     pct is where the bar lands, step is the label at that moment. */
+  var APPLY_STEPS = [
+    {   t: 0,    pct: 6,   step: 'Checking eligibility' },
+    {   t: 160,  pct: 31,  step: 'Checking eligibility' },
+    {   t: 420,  pct: 38,  step: 'Checking eligibility' },
+    {   t: 700,  pct: 44,  step: 'Reserving your rate'  },
+    {   t: 1150, pct: 47,  step: 'Reserving your rate'  },  // the hang
+    {   t: 1320, pct: 74,  step: 'Reserving your rate'  },
+    {   t: 1600, pct: 81,  step: 'Locking it in'        },
+    {   t: 1820, pct: 92,  step: 'Locking it in'        },
+    {   t: 1960, pct: 100, step: 'Ready'                }
+  ];
+  var APPLY_MS = 2000;
 
   function bootStall() {
     var modal = document.getElementById('applyModal');
-    var bar   = document.getElementById('applyBar');
+    var fill  = document.querySelector('#applyBar span');
     var step  = document.getElementById('applyStep');
     var pct   = document.getElementById('applyPct');
 
-    requestAnimationFrame(function () { bar.classList.add('is-running'); });
-
-    var t0 = Date.now();
-    var tick = setInterval(function () {
-      var p = Math.min(100, Math.round((Date.now() - t0) / APPLY_MS * 100));
-      pct.textContent = p + '%';
-      if (p > 40 && p < 80) step.textContent = 'Reserving your rate';
-      if (p >= 80) step.textContent = 'Ready';
-    }, 60);
+    APPLY_STEPS.forEach(function (s) {
+      setTimeout(function () {
+        fill.style.width = s.pct + '%';
+        pct.textContent = s.pct + '%';
+        if (step.textContent !== s.step) step.textContent = s.step;
+      }, s.t);
+    });
 
     setTimeout(function () {
-      clearInterval(tick);
       modal.hidden = true;
       document.body.classList.add('is-ready');
     }, APPLY_MS);
